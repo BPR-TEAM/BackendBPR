@@ -1,0 +1,5 @@
+{
+    "appService.preDeployTask": "publish-release",
+    "appService.deploySubpath": "OrangeBushApi\\bin\\Release\\net5.0\\publish",
+    "appService.defaultWebAppToDeploy": "/subscriptions/f5696ed6-a35a-434c-8f0c-d205c09035ae/resourceGroups/BPR/providers/Microsoft.Web/sites/orangebush"
+}
