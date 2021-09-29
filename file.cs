@@ -1,3 +1,3 @@
 //sup
 
-//fuck you github you piece of fucking garbage piece of shit test2
+//fuck Microsoft and their gay ass acquisition of github
