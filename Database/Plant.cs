@@ -10,7 +10,7 @@ namespace Database
         public string Url { get; set; }
         public string Description { get; set; }
 
-        public virtual ICollection<User> Users { get; set; }        
+        public virtual ICollection<User> Users { get; set; }       
         public virtual ICollection<Tag> Tags { get; set; }
     }
 }
