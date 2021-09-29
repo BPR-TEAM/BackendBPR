@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/OrangeBushApi/bin/Debug/net5.0/OrangeBushApi.dll",
+            "program": "${workspaceFolder}/OrangeBushApi/bin/Debug/net5.0/dll",
             "args": [],
             "cwd": "${workspaceFolder}/OrangeBushApi",
             "stopAtEntry": false,

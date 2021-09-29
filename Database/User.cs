@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 
-namespace OrangeBushApi.Database
+namespace Database
 {
     public class User
     {

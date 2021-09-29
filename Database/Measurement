@@ -1,6 +1,6 @@
 using System;
 
-namespace OrangeBushApi.Database
+namespace Database
 {
     public class Measurement
     {

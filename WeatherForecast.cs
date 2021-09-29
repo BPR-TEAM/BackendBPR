@@ -1,6 +1,6 @@
 using System;
 
-namespace OrangeBushApi
+namespace BackendBPR
 {
     public class WeatherForecast
     {
