@@ -15,7 +15,7 @@ namespace Database
 
         public virtual byte[] PasswordSalt {get; set;}
         public virtual byte[] PasswordHash {get; set;}
-        public virtual ICollection<Plant> Plants {get;set;}        
+        public virtual ICollection<UserPlant> UserPlants {get;set;}        
         public virtual ICollection<Note> Notes {get;set;}
     }
 }
