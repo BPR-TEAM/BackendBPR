@@ -1,4 +1,4 @@
-namespace Database
+namespace BackendBPR.Database
 {
     public class Dashboard
     {

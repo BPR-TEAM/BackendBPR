@@ -1,6 +1,6 @@
 using System;
 
-namespace Database
+namespace BackendBPR.Database
 {
     public class Measurement
     {

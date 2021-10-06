@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Database
+namespace BackendBPR.Database
 {
     public class Advice
     {
