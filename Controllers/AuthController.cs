@@ -30,7 +30,7 @@ namespace BackendBPR.Controllers
         /// <param name="user">Should contain all the info up to country</param>
         /// <returns></returns>
         [HttpPost]
-        [Route("register")]
+        [Route("Register")]
         public ObjectResult Register([FromBody] User user)
         {
             var password = user.PasswordHash;
@@ -57,7 +57,7 @@ namespace BackendBPR.Controllers
         /// <response code="200">Login successful returns token</response>
         /// <response code="401">"Wrong credentials</response>     
         [HttpPost]
-        [Route("login")]
+        [Route("Login")]
         [ProducesResponseType(typeof(string),200)]
         public ObjectResult Login([FromBody] User user)
         {
@@ -97,7 +97,7 @@ namespace BackendBPR.Controllers
         /// <response code="200">Logout successful</response>
         /// <response code="400">"User or token do not exist</response>     
         [HttpPost]
-        [Route("logout")]
+        [Route("Logout")]
         public ObjectResult Logout([FromHeader] string token)
         {
             ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var verified);

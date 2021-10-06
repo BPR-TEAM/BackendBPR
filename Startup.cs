@@ -31,7 +31,7 @@ namespace BackendBPR
 
             services.AddControllers();
 
-             services.AddCors((options =>
+            services.AddCors((options =>
                 { options.AddPolicy("AllowAndrei", options=>options.WithOrigins("https://orange-bush-0a396ce03.azurestaticapps.net/",
                  "http://10.10.23.187", "http://10.10.23.187:3000").AllowAnyHeader().AllowAnyMethod());}));
 
@@ -41,7 +41,7 @@ namespace BackendBPR
             });
 
             services.AddDbContext<OrangeBushContext>(options 
-                => options.UseNpgsql("Host=10.154.214.99;Database=orangebush;Username=bpr;Password=279280282MLA;Timeout=300"));
+                => options.UseNpgsql("Host=10.154.214.99;Database=orangebush;Username=bpr;Password=279280282MLA;"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 🦍

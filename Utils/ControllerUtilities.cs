@@ -23,7 +23,7 @@ namespace BackendBPR.Utils
                 tempUser = dbContext.Users
                     .First(a => a.Id == id);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 isVerified = false;
             }
@@ -52,7 +52,7 @@ namespace BackendBPR.Utils
                 user = dbContext.Users
                 .First(a => a.Id == id);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 return false;
             }
