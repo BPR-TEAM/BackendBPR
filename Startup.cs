@@ -30,6 +30,11 @@ namespace BackendBPR
         {
 
             services.AddControllers();
+
+             services.AddCors((options =>
+                { options.AddPolicy("AllowAndrei", options=>options.WithOrigins("https://orange-bush-0a396ce03.azurestaticapps.net/",
+                 "http://10.10.23.187", "http://10.10.23.187:3000").AllowAnyHeader().AllowAnyMethod());}));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OrangeBushApi", Version = "v1" });
@@ -53,6 +58,8 @@ namespace BackendBPR
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("AllowAndrei");
 
             app.UseAuthorization();
 
