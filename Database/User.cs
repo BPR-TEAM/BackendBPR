@@ -13,6 +13,7 @@ namespace Database
         public DateTime Birthday { get; set; }
         public string Country { get; set; }
 
+        public virtual string Token {get;set;}
         public virtual byte[] PasswordSalt {get; set;}
         public virtual byte[] PasswordHash {get; set;}
         public virtual ICollection<UserPlant> UserPlants {get;set;}        
