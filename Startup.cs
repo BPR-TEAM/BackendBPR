@@ -41,7 +41,7 @@ namespace BackendBPR
             });
 
             services.AddDbContext<OrangeBushContext>(options 
-                => options.UseNpgsql("Host=10.154.214.99;Database=orangebush;Username=bpr;Password=279280282MLA"));
+                => options.UseNpgsql("Host=10.154.214.99;Database=orangebush;Username=bpr;Password=279280282MLA;Timeout=300"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 🦍
