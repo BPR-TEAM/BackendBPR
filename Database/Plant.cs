@@ -13,6 +13,6 @@ namespace BackendBPR.Database
 
         public virtual ICollection<UserPlant> UserPlants { get; set; }       
         public virtual ICollection<Tag> Tags { get; set; }
-        public virtual ICollection<MeasurementDefinition> MeasurementDefinitions {get;set;}
+        public virtual ICollection<MeasurementDefinition> MeasurementDefinitions {get;set;}        
     }
 }

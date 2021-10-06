@@ -18,7 +18,8 @@ namespace BackendBPR.Database
         public DbSet<Board> Boards {get;set;}
         public DbSet<Dashboard> Dashboards {get;set;}
         public DbSet<Measurement> Measurements {get;set;}
-        public DbSet<MeasurementDefinition> MeasurementDefinitions  {get;set;}
+        public DbSet<MeasurementDefinition> MeasurementDefinitions  {get;set;}        
+        public DbSet<CustomMeasurementDefinition> CustomMeasurementDefinitions  {get;set;}
         public DbSet<Note> Notes {get;set;}
         public DbSet<Plant> Plants {get;set;}
         public DbSet<UserPlant> UserPlants {get;set;}
