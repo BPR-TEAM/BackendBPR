@@ -3,15 +3,17 @@ using System;
 using BackendBPR.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace OrangeBushApi.Migrations
 {
     [DbContext(typeof(OrangeBushContext))]
-    partial class OrangeBushContextModelSnapshot : ModelSnapshot
+    [Migration("20211008120229_image attribute on user")]
+    partial class imageattributeonuser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
