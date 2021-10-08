@@ -22,5 +22,7 @@ namespace BackendBPR.Controllers
             _logger = logger;
             _dbContext = db;
         }
+
+        
     }
 }
