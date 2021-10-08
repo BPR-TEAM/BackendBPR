@@ -1,15 +1,18 @@
-﻿﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using SEP6.Controllers;
-using SEP6.DB;
-using SEP6.Tests.Integration.Utilities;
-using Xunit;
+using BackendBPR.Controllers;
+using BackendBPR.Database;
+using BackendBPR.Tests.Integration;
+ using BackendBPR.Tests.Integration.Utilities;
+ using SEP6.Tests.Integration.Utilities;
+ using Xunit;
 
-namespace SEP6.Tests.Integration.Controllers
+namespace BackendBPR.Tests.Integration.Controllers
 {
-    public class AuthControllerTests : IClassFixture<CustomApplicationFactory<SEP6.Startup>>
+    public class AuthControllerTests : IClassFixture<CustomApplicationFactory<BackendBPR.Startup>>
     {
         private readonly CustomApplicationFactory<Startup> _factory;
 
@@ -23,17 +26,17 @@ namespace SEP6.Tests.Integration.Controllers
         public async Task Register_OK_PasswordHashed()
         {
             using var scope = _factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MoviesDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<OrangeBushContext>();
 
             var client = _factory.CreateClient();
 
             var login = new User()
             {
-                Name = "maria",
+                FirstName = "maria",
                 Username = "maria",
                 Country = "Portugal",
                 Email = "string",
-                Password = "string"
+                PasswordHash = "string"
             };
             var url = "/Auth/Register";
 
@@ -42,28 +45,30 @@ namespace SEP6.Tests.Integration.Controllers
 
             var user = db.Users.FirstOrDefault(a => a.Username == login.Username);
             var salt = user?.PasswordSalt;
-            var givenPassword = AuthController.HashPassword(salt, login.Password);
+            var givenPassword = AuthController.HashPassword(salt, login.PasswordHash);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Equal("Registration complete!", message);
-            Assert.Equal(user?.Password, givenPassword);
+            Assert.Equal(user?.PasswordHash, givenPassword);
         }
 
         [Fact]
         public async Task Login_OK()
         {
             using var scope = _factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MoviesDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<OrangeBushContext>();
 
             var client = _factory.CreateClient();
 
             var login = new User()
             {
-                Name = "",
+                FirstName = "",
                 Username = "",
                 Country = "",
                 Email = "string",
-                Password = "string"
+                PasswordHash = "string",
+                Birthday = new DateTime(2000,3,4),
+                LastName = "",
             };
             var url = "/Auth/Login";
 
@@ -80,17 +85,17 @@ namespace SEP6.Tests.Integration.Controllers
         public async Task Login_Unauthorized_BlankFields()
         {
             using var scope = _factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MoviesDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<OrangeBushContext>();
 
             var client = _factory.CreateClient();
 
             var login = new User()
             {
-                Name = "",
+                FirstName = "",
                 Username = "",
                 Country = "",
                 Email = "",
-                Password = "null"
+                PasswordHash = "null"
             };
             var url = "/Auth/Login";
 
@@ -105,17 +110,17 @@ namespace SEP6.Tests.Integration.Controllers
         public async Task Login_Unauthorized_UserDoesNotExist()
         {
             using var scope = _factory.Services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MoviesDbContext>();
+            var db = scope.ServiceProvider.GetRequiredService<OrangeBushContext>();
 
             var client = _factory.CreateClient();
 
             var login = new User()
             {
-                Name = "",
+                FirstName = "",
                 Username = "",
                 Country = "",
                 Email = "null",
-                Password = "null"
+                PasswordHash = "null"
             };
             var url = "/Auth/Login";
 
@@ -134,11 +139,11 @@ namespace SEP6.Tests.Integration.Controllers
 
             var login = new User()
             {
-                Name = "",
+                FirstName = "",
                 Username = "",
                 Country = "",
                 Email = "string",
-                Password = "stringy"
+                PasswordHash = "stringy"
             };
             var url = "/Auth/Login";
 

@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -6,10 +6,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SEP6.DB;
-using TMDbLib.Client;
+using BackendBPR.Database;
 
-namespace SEP6.Tests.Integration.Utilities
+namespace BackendBPR.Tests.Integration.Utilities
 {
     public class CustomApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup: class
     {
@@ -23,10 +22,10 @@ namespace SEP6.Tests.Integration.Utilities
 
                 var descriptor = services.SingleOrDefault(
                     d => d.ServiceType ==
-                         typeof(DbContextOptions<MoviesDbContext>));
+                         typeof(DbContextOptions<OrangeBushContext>));
                 services.Remove(descriptor);
 
-                services.AddDbContext<MoviesDbContext>(options =>
+                services.AddDbContext<OrangeBushContext>(options =>
                 {
                     options.UseSqlite(Connection);
                 });
@@ -36,7 +35,7 @@ namespace SEP6.Tests.Integration.Utilities
                 using (var scope = sp.CreateScope())
                 {
                     var scopedServices = scope.ServiceProvider;
-                    var db = scopedServices.GetRequiredService<MoviesDbContext>();
+                    var db = scopedServices.GetRequiredService<OrangeBushContext>();
                     var logger = scopedServices
                         .GetRequiredService<ILogger<CustomApplicationFactory<TStartup>>>();
 

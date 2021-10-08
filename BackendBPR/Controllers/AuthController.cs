@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using BackendBPR.Database;
 using BackendBPR.Utils;
 
+
+[assembly:InternalsVisibleTo("BackendBPR.Tests.Integration")]
 namespace BackendBPR.Controllers
 {
    
