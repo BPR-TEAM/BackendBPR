@@ -30,13 +30,18 @@ namespace BackendBPR
         {
 
             services.AddControllers();
+
+            services.AddCors((options =>
+                { options.AddPolicy("AllowAndrei", options=>options.WithOrigins("https://orange-bush-0a396ce03.azurestaticapps.net/",
+                 "http://10.10.23.187", "http://10.10.23.187:3000").AllowAnyHeader().AllowAnyMethod());}));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OrangeBushApi", Version = "v1" });
             });
 
             services.AddDbContext<OrangeBushContext>(options 
-                => options.UseNpgsql("Host=10.154.214.99;Database=orangebush;Username=bpr;Password=279280282MLA"));
+                => options.UseNpgsql("Host=10.154.214.99;Port=5432;Database=orangebush;Username=bpr;Password=279280282MLA;"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 🦍
@@ -45,14 +50,15 @@ namespace BackendBPR
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "OrangeBushApi 🦍 v1"));
 
-            if (env.IsDevelopment())
-            {
+            
                 app.UseDeveloperExceptionPage();
-            }
+            
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors("AllowAndrei");
 
             app.UseAuthorization();
 
