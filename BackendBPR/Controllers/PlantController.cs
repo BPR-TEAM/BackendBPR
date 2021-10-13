@@ -58,11 +58,11 @@ namespace BackendBPR.Controllers
                         filteredList.Where(a => a.Tags.Contains(tag)).ToList();
                     }
                     filteredList = _dbContext.Plants
-                    .Select(p => new Plant() {Id = p.Id, Tags = p.Tags, CommonName = p.CommonName,ScientificName = p.ScientificName})
                     .Include(a => a.Tags)
                     .AsNoTracking()
                     .AsParallel()
                     .Where(a => a.Tags.Contains(tag))
+                    .Select(p => new Plant() {Id = p.Id, Tags = p.Tags, CommonName = p.CommonName,ScientificName = p.ScientificName})
                     .ToList();
                 }
                 if(String.IsNullOrEmpty(name)){

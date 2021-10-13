@@ -13,6 +13,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using BackendBPR.Database;
+using System.Reflection;
+using System.IO;
 
 namespace BackendBPR
 {
@@ -38,10 +40,15 @@ namespace BackendBPR
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "OrangeBushApi", Version = "v1" });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
             });
 
             services.AddDbContext<OrangeBushContext>(options 
-                => options.UseNpgsql("Server=orangebush.postgres.database.azure.com;Database=postgres;Port=5432;User Id=bpr@orangebush;Password=279280282MLAmla;Ssl Mode=Require;"));
+                => options.UseNpgsql(Configuration.GetConnectionString("AzurePgDB")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 🦍
