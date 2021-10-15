@@ -12,6 +12,10 @@ using FuzzySharp;
 
 namespace BackendBPR.Controllers
 {
+
+    /// <summary>
+    /// Controller for plants
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PlantController : ControllerBase
@@ -19,6 +23,11 @@ namespace BackendBPR.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly OrangeBushContext _dbContext;
 
+        /// <summary>
+        /// Controller constructor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="db"></param>
         public PlantController(ILogger<AuthController> logger, OrangeBushContext db)
         {
             _logger = logger;
@@ -40,10 +49,94 @@ namespace BackendBPR.Controllers
                     .FirstOrDefault(a => a.Id == id));
         }
 
+        
+        /// <summary>
+        /// Add tag to plant
+        /// </summary>
+        /// <param name="name">Name of plant</param>
+        /// <param name="plantId">Plant id</param>
+        /// <param name="token">User token</param>
+        /// <returns>Message</returns>
+        [HttpPost]
+        [Route("tag")]
+        public ObjectResult AddTag(string name, int plantId, [FromHeader] string token)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            var tag = _dbContext.Tags.FirstOrDefault( t => t.Name == name && t.Id == user.Id);
+ 
+            if(tag == null){
+                tag = new Tag {
+                    Name = name,
+                    UserId = user.Id
+                };
+            }
+
+           _dbContext.Plants.Include(p => p.Tags).FirstOrDefault(p => p.Id == plantId).Tags.Add(tag);
+           _dbContext.SaveChanges();
+           return Ok("Tag added");
+        }
+
+        /// <summary>
+        /// Removes tag from plant
+        /// </summary>
+        /// <param name = "name"></param>
+        /// <param name="plantId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("tag")]
+        public ObjectResult RemoveTag(string name, int plantId, [FromHeader] string token)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+           var tagToRemove =_dbContext.Tags.FirstOrDefault(t => t.Name == name && t.UserId == user.Id);
+           _dbContext.Plants.Include(p => p.Tags).FirstOrDefault(p => p.Id == plantId).Tags.Remove(tagToRemove);
+           _dbContext.SaveChanges();
+
+
+           return Ok("Tag removed");
+        }
+
+
+        /// <summary>
+        /// Take this plant
+        /// </summary>
+        /// <param plant="plant"></param>
+        /// <returns>The plant</returns>
+        [HttpPost]
+        public ObjectResult TakePlant(UserPlant plant)
+        {
+           _dbContext.UserPlants.Add(plant);
+           _dbContext.SaveChanges();
+           return Ok("Plant added");
+        }
+
+        /// <summary>
+        /// Get a plant default tags
+        /// </summary>
+        /// <param name="plantId"></param>
+        /// <returns>The tags</returns>
+        [HttpGet]
+        [Route("tag")]
+        public ObjectResult GetDefaultTags([FromBody] int? plantId)
+        {
+           if(plantId == null){
+               return Ok(_dbContext.Tags
+                    .Where( p=> p.UserId == null));
+           }
+           return Ok(_dbContext.Tags
+                    .Where( p => p.Id == plantId && p.UserId == null));
+        }
+
         /// <summary>
         /// Search for plant by tags or it's name
         /// </summary>
-        /// <param tags="tags"></param>        
+        /// <param name="tags"></param>        
         /// <param name="name"></param>
         /// <returns>List of possible plants corresponding to the search</returns>
         [HttpGet]
@@ -81,6 +174,12 @@ namespace BackendBPR.Controllers
             return Ok(returnList); 
         }
 
+        /// <summary>
+        /// Method in charge of searching the plant
+        /// </summary>
+        /// <param name="searchText">Possible plant name</param>
+        /// <param name="plants">Optional, in case the plant is to be searched in a list instead of the DB</param>
+        /// <returns>A string list with Common and Scientific name and ID </returns>
          [NonAction]
         public List<string> SearchByPlantName(string searchText, List<Plant> plants = null)
         {
@@ -113,6 +212,7 @@ namespace BackendBPR.Controllers
             }            
             return ratios.Keys.ToList();
         }
+
 
     }
 

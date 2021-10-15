@@ -69,7 +69,7 @@ namespace BackendBPR.Controllers
 
                 _dbContext.Users.Update(_dbContext.Users.FirstOrDefault(oldUser => oldUser.Token == user.Token));
                 _dbContext.SaveChanges();
-                return Ok("Profile updated succesfully");
+                return Ok("Profile updated successfully");
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace BackendBPR.Controllers
 
             _dbContext.Users.Remove(_dbContext.Users.FirstOrDefault(user => user.Token == token));
             _dbContext.SaveChanges();
-            return Ok("Profile deleted succesfully");
+            return Ok("Profile deleted successfully");
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace BackendBPR.Controllers
             _dbContext.Users.Include(currentUser => currentUser.Notes).FirstOrDefault(currentUser => currentUser.Token == user.Token).Notes.FirstOrDefault(note => note.Id == id)
             .Text = user.Notes.First().Text;
             _dbContext.SaveChanges();
-            return Ok("The note has been edited succesfully");
+            return Ok("The note has been edited successfully");
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace BackendBPR.Controllers
             _dbContext.Notes.Remove(_dbContext.Notes.FirstOrDefault(note => note.Id == id && note.UserId == _dbContext.Users
             .FirstOrDefault(user => user.Token == token).Id));
             _dbContext.SaveChanges();
-            return Ok("The note has been deleted succesfully");
+            return Ok("The note has been deleted successfully");
         }
     }
     
