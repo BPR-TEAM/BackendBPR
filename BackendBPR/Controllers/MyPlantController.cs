@@ -76,18 +76,18 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Remove my plant
         /// </summary>
-        /// <param plant="plantId"></param>
+        /// <param name="userPlantId"></param>
         /// <param name="token">authentication token</param>
         /// <returns>Success message</returns>
         [HttpDelete]
-        public ObjectResult RemoveMyPlant([FromHeader] string token, int id)
+        public ObjectResult RemoveMyPlant([FromHeader] string token, int userPlantId)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
            var userPlant = _dbContext.UserPlants
            .AsParallel()
-           .FirstOrDefault(a => a.PlantId == id);
+           .FirstOrDefault(a => a.PlantId == userPlantId);
 
            _dbContext.Remove(userPlant);
            _dbContext.SaveChanges();
@@ -96,9 +96,9 @@ namespace BackendBPR.Controllers
         }
 
          /// <summary>
-        /// Get my plant
+        /// Get measurements of a plant
         /// </summary>
-        /// <param id="id"></param>
+        /// <param name="userPlantId"></param>
         /// <param name="token">authentication token</param>
         /// <returns>The plant measurements</returns>
         [HttpGet]        
