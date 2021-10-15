@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BackendBPR.Controllers
 {
+    /// <summary>
+    /// Controller responsible for users
+    /// </summary>
     
     [ApiController]
     [Route("[controller]")]
@@ -17,7 +20,11 @@ namespace BackendBPR.Controllers
     {
         private readonly ILogger<AuthController> _logger;
         private readonly OrangeBushContext _dbContext;
-
+        /// <summary>
+        /// Constructor for instantiating the controller
+        /// </summary>
+        /// <param name="logger">The logger to use</param>
+        /// <param name="db">The database context to query</param>
         public UserController(ILogger<AuthController> logger, OrangeBushContext db)
         {
             _logger = logger;
@@ -31,7 +38,7 @@ namespace BackendBPR.Controllers
         /// <returns>The user whose token matches the one provided</returns>
         [HttpGet]
         [Route("/profile")]
-        public ObjectResult GetCurrentUser([FromBody] string token)
+        public ObjectResult GetCurrentUser([FromHeader] string token)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -55,7 +62,7 @@ namespace BackendBPR.Controllers
         /// <returns>Whether or not the update went through</returns>
         [HttpPut]
         [Route("/profile")]
-        public ObjectResult EditProfile([FromBody] User user)
+        public ObjectResult EditProfile([FromHeader] User user)
         {
             if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -91,7 +98,7 @@ namespace BackendBPR.Controllers
         /// <returns>Whether or not the user profile was deleted</returns>
         [HttpDelete]
         [Route("/profile")]
-        public ObjectResult DeleteProfile([FromBody] string token)
+        public ObjectResult DeleteProfile([FromHeader] string token)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -108,7 +115,7 @@ namespace BackendBPR.Controllers
         /// <returns>The notes that the matched user has</returns>
         [HttpGet]
         [Route("/profile/notes")]
-        public ObjectResult GetNotes([FromBody] string token)
+        public ObjectResult GetNotes([FromHeader] string token)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -128,7 +135,7 @@ namespace BackendBPR.Controllers
         /// <returns>The note that was requested</returns>
         [HttpGet]
         [Route("/profile/note")]
-        public ObjectResult GetNote([FromBody] string token, [FromHeader] int id)
+        public ObjectResult GetNote([FromHeader] string token, [FromHeader] int id)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -185,7 +192,7 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Route("/profile/note")]
-        public ObjectResult DeleteNote([FromBody] string token, [FromHeader] int id)
+        public ObjectResult DeleteNote([FromHeader] string token, [FromHeader] int id)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");

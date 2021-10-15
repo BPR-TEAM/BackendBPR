@@ -50,28 +50,33 @@ namespace BackendBPR.Database
         public byte[] Image { get; set;}
         /// <summary>
         /// The current token associated with this user - assigned at login and removed at logout/timeout
+        /// Virtual so it needs to be 'included' when using LINQ queries
         /// </summary>
         /// <value>Virtual plain text</value>
         public virtual string Token {get;set;}
         /// <summary>
         /// The salt that was used to hash the password - generated when registering
+        /// Virtual so it needs to be 'included' when using LINQ queries
         /// </summary>
         /// <value>Virtual byte array</value>
         public virtual byte[] PasswordSalt {get; set;}
         /// <summary>
         /// The password in its hashed format - hashed on registration in the controller
+        /// Virtual so it needs to be 'included' when using LINQ queries
         /// </summary>
         /// <value>Plain text hash</value>
         public virtual string PasswordHash {get; set;}
         /// <summary>
         /// The collection of personal plants the user has
+        /// Virtual so it needs to be 'included' when using LINQ queries
         /// </summary>
-        /// <value>Virtual collection</value>
+        /// <value>Virtual collection of userPlants</value>
         public virtual ICollection<UserPlant> UserPlants {get;set;}
         /// <summary>
         /// The collection of notes the user has
+        /// Virtual so it needs to be 'included' when using LINQ queries
         /// </summary>
-        /// <value>Virtual collection</value>        
+        /// <value>Virtual collection of notes</value>        
         public virtual ICollection<Note> Notes {get;set;}
     }
 }

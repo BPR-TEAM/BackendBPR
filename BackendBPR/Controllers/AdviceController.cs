@@ -1,15 +1,12 @@
-using System;
-using System.Linq;
-using System.Security.Cryptography;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using BackendBPR.Database;
-using BackendBPR.Utils;
-
 
 namespace BackendBPR.Controllers
 {
+    /// <summary>
+    /// Controller that is responsible for advice
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class AdviceController : ControllerBase
@@ -17,6 +14,11 @@ namespace BackendBPR.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly OrangeBushContext _dbContext;
 
+        /// <summary>
+        /// Constructor for instantiating the controller
+        /// </summary>
+        /// <param name="logger">The logger to use</param>
+        /// <param name="db">The database context to query</param>
         public AdviceController(ILogger<AuthController> logger, OrangeBushContext db)
         {
             _logger = logger;

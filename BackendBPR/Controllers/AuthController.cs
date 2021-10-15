@@ -12,14 +12,20 @@ using BackendBPR.Utils;
 [assembly:InternalsVisibleTo("BackendBPR.Tests.Integration")]
 namespace BackendBPR.Controllers
 {
-   
+    /// <summary>
+    /// Controller that is responsible for authentication and authorization
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class AuthController: ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
         private readonly OrangeBushContext _dbContext;
-
+        /// <summary>
+        /// Constructor for instantiating the controller
+        /// </summary>
+        /// <param name="logger">The logger to use</param>
+        /// <param name="db">The database context to query</param>
         public AuthController(ILogger<AuthController> logger, OrangeBushContext db)
         {
             _logger = logger;
