@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace SEP6.Tests.Integration.Utilities
+namespace BackendBPR.Tests.Integration.Utilities
 {
     public static class ResponseHandler<T>
     {

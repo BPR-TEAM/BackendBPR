@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System;
 using BackendBPR.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,8 +18,8 @@ namespace BackendBPR.Tests.Integration.Utilities
             if (isEmpty) return;
             //Seeds here
             SeedUsers();
-            // SeedMovies();
-            
+            SeedPlantsWithTags();  
+            SeedMeasurementDefintionsAndUserPlant();          
         }
 
         private static void SeedUsers()
@@ -39,6 +40,77 @@ namespace BackendBPR.Tests.Integration.Utilities
             OBDB.Users.Add(user);
             OBDB.SaveChanges();
         }
+
+         private static void SeedPlantsWithTags()
+        {
+            var tag = new Tag {
+              Id = 1,
+              Name = "Passion Fruit"
+            };
+
+            var tag2 = new Tag {
+              Id = 2,
+              Name = "Passion Banana Fruit"
+            };
+
+            OBDB.Tags.AddRange(tag,tag2);
+
+            var plant = new Plant()
+            {
+                Id = 1,
+                CommonName = "Common Name",
+                ScientificName = "Plant",
+                Url = "go here",
+                Description = "yo thats a plant that exists in places and lives a certain lifespan",
+                Tags = new List<Tag>(){
+                    tag, tag2
+                }
+            };
+
+            var plant1 = new Plant()
+            {
+                Id = 2,
+                CommonName = "Non-Ass Name",
+                ScientificName = "Planties",
+                Url = "go here",
+                Description = "yo thats a plant that exists in places and lives a certain lifespan",
+                Tags = new List<Tag>(){
+                    tag
+                }
+            };
+
+            OBDB.Plants.AddRange(plant,plant1);
+            OBDB.SaveChanges();
+        }
+        
+        private static void SeedMeasurementDefintionsAndUserPlant(){
+            var plant = new UserPlant(){
+                Id = 5,
+                UserId = 1,
+                PlantId = 1,
+                Name = "Banana Passion Fruit"                
+            };
+
+            OBDB.UserPlants.Add(plant);
+
+            var co2 = new MeasurementDefinition(){
+                Name = "CO2",
+                Id = 1,
+                PlantId = 1
+            };
+
+             var humidity = new CustomMeasurementDefinition(){
+                Name = "Humidity",
+                Id = 2,
+                PlantId = 1,
+                UserPlantId = 5
+            };
+        
+            OBDB.MeasurementDefinitions.AddRange(co2,humidity);
+            OBDB.SaveChanges();
+        }
+
+
         
         private static void Clear<T>(DbSet<T> dbSet) where T : class
         {

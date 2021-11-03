@@ -145,18 +145,26 @@ namespace BackendBPR.Controllers
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-           string[] csvRows = csv.Split("/n");
+           string[] csvRows = csv.Split("\n");
            string[] defintions = csvRows[0].Split(",");
            var md = new List<MeasurementDefinition>();
            var measurementsToAdd = new List<Measurement>();
 
-           foreach (var definition in defintions){
-               if(definition != "Date"){                   
-                  md.Add(_dbContext.MeasurementDefinitions.FirstOrDefault( m => m.Name == definition));
-               }
-           }     
 
-           foreach ( var row in csvRows.Skip(1)) {
+
+            foreach (var definition in defintions)
+            {
+                MeasurementDefinition mdDb = new MeasurementDefinition();
+                mdDb = _dbContext.CustomMeasurementDefinitions.FirstOrDefault(m => m.Name == definition && m.UserPlantId == userPlantId);
+                if (mdDb == null)
+                {
+                    var plant = _dbContext.UserPlants.First(p => p.Id == userPlantId);
+                    mdDb = _dbContext.MeasurementDefinitions.FirstOrDefault(m => m.Name == definition && m.PlantId == plant.PlantId);
+                }
+                md.Add(mdDb);
+            }
+
+            foreach ( var row in csvRows.Skip(1)) {
                string[] measurements = row.Split(",");
                for(int i = 0; i < measurements.Count(); i = i+2){
                    var m = new Measurement(){

@@ -139,7 +139,7 @@ namespace BackendBPR.Controllers
         /// <param name="tags"></param>        
         /// <param name="name"></param>
         /// <returns>List of possible plants corresponding to the search</returns>
-        [HttpGet]
+        [HttpPost]
         [Route("search")]
         public ObjectResult SearchPlant([FromBody] List<Tag> tags,string name)
         {
@@ -154,7 +154,7 @@ namespace BackendBPR.Controllers
                     .Include(a => a.Tags)
                     .AsNoTracking()
                     .AsParallel()
-                    .Where(a => a.Tags.Contains(tag))
+                    .Where(a => a.Tags.Any(t => t.Id == tag.Id))
                     .Select(p => new Plant() {Id = p.Id, Tags = p.Tags, CommonName = p.CommonName,ScientificName = p.ScientificName})
                     .ToList();
                 }
@@ -184,7 +184,7 @@ namespace BackendBPR.Controllers
         public List<string> SearchByPlantName(string searchText, List<Plant> plants = null)
         {
             if(plants == null)
-                plants = _dbContext.Plants.Select(p => new Plant(){CommonName = p.CommonName, Id = p.Id})
+                plants = _dbContext.Plants.Select(p => new Plant(){CommonName = p.CommonName, ScientificName = p.ScientificName, Id = p.Id})
                 .AsNoTracking()
                 .AsParallel()
                 .ToList();
@@ -192,9 +192,9 @@ namespace BackendBPR.Controllers
             var ratios = new Dictionary<string,int>();
             foreach (var plant in plants)
             {
-                var ratio = (int)(Fuzz.Ratio(searchText, plant.CommonName) * 0.5
-                                  + Fuzz.PartialRatio(searchText,plant.CommonName) * 0.75
-                                  + Fuzz.TokenSortRatio(searchText, plant.CommonName) + 0.75 )/2;
+                var commonNameRatio = (int)(Fuzz.Ratio(searchText, plant.CommonName));
+                var scientificNameRatio = (int)(Fuzz.Ratio(searchText, plant.ScientificName));
+                var ratio = commonNameRatio > scientificNameRatio ? commonNameRatio : scientificNameRatio;
               
                 if (ratios.Count < 10)
                 {

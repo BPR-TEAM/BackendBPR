@@ -7,7 +7,6 @@ using BackendBPR.Controllers;
 using BackendBPR.Database;
 using BackendBPR.Tests.Integration;
  using BackendBPR.Tests.Integration.Utilities;
- using SEP6.Tests.Integration.Utilities;
  using Xunit;
 
 namespace BackendBPR.Tests.Integration.Controllers
