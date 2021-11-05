@@ -3,15 +3,17 @@ using System;
 using BackendBPR.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace OrangeBushApi.Migrations
 {
     [DbContext(typeof(OrangeBushContext))]
-    partial class OrangeBushContextModelSnapshot : ModelSnapshot
+    [Migration("20211103140736_unique constrains on  user")]
+    partial class uniqueconstrainsonuser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

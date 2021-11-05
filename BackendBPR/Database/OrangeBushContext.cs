@@ -84,6 +84,8 @@ namespace BackendBPR.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserAdvice>().HasKey(a => new { a.AdviceId, a.UserId});
+            modelBuilder.Entity<User>().HasIndex(a=> a.Username).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(a=> a.Email).IsUnique();
         }
     }
 
