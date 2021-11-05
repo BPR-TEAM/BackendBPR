@@ -208,11 +208,11 @@ namespace BackendBPR.Controllers
                         ratios.Remove(lowestRatio.Key);
                         ratios.Add( $"{plant.CommonName},{plant.ScientificName},{plant.Id}",ratio);
                     }
-                }
-            }            
-            return ratios.Keys.ToList();
-        }
+                }            
+            }       
 
+            return ratios.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value).Keys.ToList();
+        }
 
     }
 
