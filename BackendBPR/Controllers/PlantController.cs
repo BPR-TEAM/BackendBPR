@@ -40,7 +40,7 @@ namespace BackendBPR.Controllers
         /// <param id="plantId"></param>
         /// <returns>The plant</returns>
         [HttpGet]
-        public ObjectResult GetPlant([FromBody] int id)
+        public ObjectResult GetPlant(int id)
         {
            return Ok(_dbContext.Plants
                     .Include(a => a.Tags)
