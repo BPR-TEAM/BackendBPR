@@ -34,7 +34,7 @@ namespace BackendBPR.Tests.Integration.Controllers
                 FirstName = "maria",
                 Username = "maria",
                 Country = "Portugal",
-                Email = "string",
+                Email = "maria",
                 PasswordHash = "string"
             };
             var url = "/Auth/Register";
