@@ -67,9 +67,9 @@ namespace BackendBPR.Controllers
             if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-                _dbContext.Users.Update(_dbContext.Users.FirstOrDefault(oldUser => oldUser.Token == user.Token));
-                _dbContext.SaveChanges();
-                return Ok("Profile updated successfully");
+            _dbContext.Users.Update(_dbContext.Users.FirstOrDefault(oldUser => oldUser.Token == user.Token));
+            _dbContext.SaveChanges();
+            return Ok("Profile updated successfully");
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace BackendBPR.Controllers
         /// <returns>The note that was requested</returns>
         [HttpGet]
         [Route("/profile/note")]
-        public ObjectResult GetNote([FromHeader] string token, [FromHeader] int id)
+        public ObjectResult GetNote([FromHeader] string token, int id)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -159,7 +159,8 @@ namespace BackendBPR.Controllers
                 return Unauthorized("User/token mismatch");
 
             //This LINQ makes sense but I feel like it's going to want me to use "Include" somewhere in it
-            _dbContext.Users.Include(currentUser => currentUser.Notes).FirstOrDefault(currentUser => currentUser.Token == user.Token).Notes.Add(user.Notes.First());
+            _dbContext.Users.Include(currentUser => currentUser.Notes).FirstOrDefault(currentUser => currentUser.Token == user.Token)
+            .Notes.Add(user.Notes.First());
             _dbContext.SaveChanges();
             return Ok("The note has been added successfully");
         }
@@ -172,7 +173,7 @@ namespace BackendBPR.Controllers
         /// <returns>Whether or not the note was updated</returns>
         [HttpPut]
         [Route("/profile/note")]
-        public ObjectResult EditNote([FromBody] User user, [FromHeader] int id)
+        public ObjectResult EditNote([FromBody] User user, int id)
         {
             if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -189,10 +190,10 @@ namespace BackendBPR.Controllers
         /// </summary>
         /// <param name="token">The user token to match to</param>
         /// <param name="id">The note id to match to</param>
-        /// <returns></returns>
+        /// <returns>Whether or not the note was deleted</returns>
         [HttpDelete]
         [Route("/profile/note")]
-        public ObjectResult DeleteNote([FromHeader] string token, [FromHeader] int id)
+        public ObjectResult DeleteNote([FromHeader] string token, int id)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
