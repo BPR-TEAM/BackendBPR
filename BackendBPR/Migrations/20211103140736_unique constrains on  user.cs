@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿
+#pragma warning disable 1591
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace OrangeBushApi.Migrations
 {

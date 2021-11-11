@@ -19,7 +19,8 @@ namespace BackendBPR.Tests.Integration.Utilities
             //Seeds here
             SeedUsers();
             SeedPlantsWithTags();  
-            SeedMeasurementDefintionsAndUserPlant();          
+            SeedMeasurementDefintionsAndUserPlant();  
+            SeedAdvices();              
         }
 
         private static void SeedUsers()
@@ -80,6 +81,7 @@ namespace BackendBPR.Tests.Integration.Utilities
             };
 
             OBDB.Plants.AddRange(plant,plant1);
+
             OBDB.SaveChanges();
         }
         
@@ -110,6 +112,50 @@ namespace BackendBPR.Tests.Integration.Utilities
             OBDB.SaveChanges();
         }
 
+        private static void SeedAdvices(){            
+            var advice = new Advice(){
+                Description = "Water tour plants regularly",
+                TagId = 1,
+                Id = 1
+            };
+
+            var generalAdvice = new Advice(){
+                Description = "Water tour plants regularly",
+                Id = 2
+            };
+
+            var generalAdvice1 = new Advice(){
+                Description = "6-8h of sun regularly",
+                Id = 3
+            };
+
+             var generalAdvice2 = new Advice(){
+                Description = "6-8h of sun regularly",
+                Id = 4
+            };
+
+            var userAdvice = new UserAdvice(){
+                UserId = 1,
+                AdviceId = 1,
+                Type = AdviceRole.Creator
+            };
+
+            var userAdvice1 = new UserAdvice(){
+                UserId = 1,
+                AdviceId = 2,
+                Type = AdviceRole.Like
+            };
+
+            var userAdvice2 = new UserAdvice(){
+                UserId = 1,
+                AdviceId = 3,
+                Type = AdviceRole.Like
+            };
+
+            OBDB.Advices.AddRange(advice,generalAdvice,generalAdvice1,generalAdvice2);
+            OBDB.UserAdvices.AddRange(userAdvice,userAdvice1,userAdvice2);
+            OBDB.SaveChanges();
+        }
 
         
         private static void Clear<T>(DbSet<T> dbSet) where T : class

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 namespace BackendBPR.Database
 {
     /// <summary>
@@ -31,8 +32,7 @@ namespace BackendBPR.Database
         /// The action that was taken
         /// </summary>
         /// <value>Enumerator describing the action</value>
-        public AdviceRole Type {get;set;}
-        
+        public AdviceRole Type {get;set;}        
     }
 }
 

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BackendBPR.Database
 {
     /// <summary>
@@ -25,6 +27,11 @@ namespace BackendBPR.Database
         /// The description for this advice
         /// </summary>
         /// <value>Plain text</value>
-        public string Description {get; set;}
+        public string Description {get; set;}        
+        /// <summary>
+        /// List of user interatcion with the advice (liked, created or disliked the advice)
+        /// </summary>
+        /// <value>List of user advices</value>
+        public virtual List<UserAdvice> UserAdvices {get;set;}
     }
 }

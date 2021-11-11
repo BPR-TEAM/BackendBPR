@@ -32,52 +32,96 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Gets the general advice for a given plant
         /// </summary>
-        /// <param name="plantId">The plantId of the plant in question</param>
-        /// <returns>A list of the advice for the given plant</returns>
+        /// <returns>A list of the general advice</returns>
         [HttpGet]
         [Route("default")]
-        public ActionResult GetDefaultAdviceForPlant(int plantId)
+        public ActionResult GetDefaultAdvice()
         {
-            List<Advice> defaultAdvice = new List<Advice>();
-            defaultAdvice = (List<Advice>) _dbContext.Advices.Where(advice => advice.TagId == null).Include(advice => advice.Tag)
-            .Select(a => a.Tag).Include(tag => tag.Plants).Where(plant => plant.Id == plantId);
+            var defaultAdvice = new List<Advice>();
+            defaultAdvice = _dbContext.Advices
+            .Where(advice => advice.TagId == null)
+            .AsNoTracking()
+            .AsParallel()
+            .ToList();
+
             return Ok(defaultAdvice);
         }
 
 
         [HttpGet]
-        public ActionResult GetAdvice(int plantId, [FromHeader] string _token)
+        public ActionResult GetAdvice(int plantId,[FromHeader] string token)
         {
-            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
+            if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            List<UserAdvice> userAdvice = new List<UserAdvice>();
-            userAdvice = (List<UserAdvice>) _dbContext.UserAdvices.Where(a => a.)
+            var userAdvice = new List<Advice>();
+            userAdvice = _dbContext.Advices
+            .Include(advice => advice.UserAdvices)
+            .Include(advice => advice.Tag)
+            .ThenInclude( tag => tag.Plants)
+            .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))
+            .AsNoTracking()
+            .AsParallel()
+            .ToList();
+
             return Ok(userAdvice);
         }
 
         [HttpPut]
-        public ActionResult Vote(int adviceId, AdviceRole vote, [FromHeader] string _token)
+        public ActionResult Vote(int adviceId, AdviceRole vote, [FromHeader] string token)
         {
-            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
-            return Unauthorized();
+            
+            var message = "";
+            var userAdvice = _dbContext.UserAdvices.FirstOrDefault(a => a.AdviceId == adviceId && a.UserId == user.Id);
+            if(userAdvice == null){
+                _dbContext.UserAdvices.Add(new UserAdvice(){
+                    AdviceId =adviceId,
+                    UserId = user.Id,
+                    Type = vote
+                });
+                message = "UserAdvice added";
+            } else if(userAdvice.Type != AdviceRole.Creator && userAdvice.Type != vote){
+                userAdvice.Type = vote;                
+                message = "UserAdvice type updated";
+            } else if(userAdvice.Type != AdviceRole.Creator && userAdvice.Type == vote){
+                _dbContext.UserAdvices.Remove(userAdvice);          
+               message = "UserAdvice removed";
+            }
+            _dbContext.SaveChanges();
+            return Ok(message);
         }
 
         [HttpPost]
-        public ActionResult Give(int plantId, [FromBody] Advice advice ,[FromHeader] string _token)
+        public ActionResult Give(int plantId, [FromBody] Advice advice ,[FromHeader] string token)
         {
-            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
-            return Unauthorized();
+
+            _dbContext.Advices.Add(advice);
+            _dbContext.UserAdvices.Add(new UserAdvice {
+                UserId = user.Id,
+                AdviceId = advice.Id,
+                Type = AdviceRole.Creator
+            });
+            _dbContext.SaveChanges();
+            
+            return Ok("Advice added");
         }
 
         [HttpDelete]
-        public ActionResult DeleteOwn(int adviceId, [FromHeader] string _token)
+        public ActionResult DeleteOwn(int adviceId, [FromHeader] string token)
         {
-            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
+            if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
-            return Unauthorized();
+
+            var advice = _dbContext.Advices.FirstOrDefault(a=>a.Id == adviceId);
+            _dbContext.Advices.Remove(advice);
+            _dbContext.SaveChanges();
+            return Ok("Advice was removed");
         }
     }
 }

@@ -122,7 +122,8 @@ namespace BackendBPR.Controllers
 
             //This LINQ makes sense but I feel like it's going to want me to use "Include" somewhere in it
             List<Note> notes =  new List<Note>();
-            notes = (List<Note>) _dbContext.Notes.Where(notes => notes.UserId == _dbContext.Users
+            notes = (List<Note>) _dbContext.Notes
+            .Where(notes => notes.UserId == _dbContext.Users
             .FirstOrDefault(user => user.Token == token).Id);
             return Ok(notes);
         }

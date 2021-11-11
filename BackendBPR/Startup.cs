@@ -27,6 +27,11 @@ namespace BackendBPR
 
             services.AddControllers();
 
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson(options =>
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+                );
+
             services.AddCors((options =>
                 { options.AddPolicy("AllowAndrei", options=>options.WithOrigins("https://orange-bush-0a396ce03.azurestaticapps.net/",
                  "http://10.10.23.187", "http://10.10.23.187:3000").AllowAnyHeader().AllowAnyMethod());}));
