@@ -47,7 +47,12 @@ namespace BackendBPR.Controllers
             return Ok(defaultAdvice);
         }
 
-
+        /// <summary>
+        /// Get all the advices for a plant
+        /// </summary>
+        /// <param name="plantId">Plant's Id</param>
+        /// <param name="token">User token</param>
+        /// <returns></returns>
         [HttpGet]
         public ActionResult GetAdvice(int plantId,[FromHeader] string token)
         {
@@ -67,6 +72,13 @@ namespace BackendBPR.Controllers
             return Ok(userAdvice);
         }
 
+        /// <summary>
+        /// Like or dislike a device
+        /// </summary>
+        /// <param name="adviceId">Advice's Id</param>
+        /// <param name="vote">Like -> 1 ||| Dislike -> 0</param>
+        /// <param name="token">User token</param>
+        /// <returns></returns>
         [HttpPut]
         public ActionResult Vote(int adviceId, AdviceRole vote, [FromHeader] string token)
         {
@@ -93,7 +105,14 @@ namespace BackendBPR.Controllers
             _dbContext.SaveChanges();
             return Ok(message);
         }
-
+        
+        /// <summary>
+        /// Give advice on a group of plants
+        /// </summary>
+        /// <param name="plantId">Plant you're commenting on</param>
+        /// <param name="advice">The advice object</param>
+        /// <param name="token">User token</param>
+        /// <returns></returns>
         [HttpPost]
         public ActionResult Give(int plantId, [FromBody] Advice advice ,[FromHeader] string token)
         {
@@ -112,6 +131,12 @@ namespace BackendBPR.Controllers
             return Ok("Advice added");
         }
 
+        /// <summary>
+        /// Dele your own comment
+        /// </summary>
+        /// <param name="adviceId">The advice id to delete</param>
+        /// <param name="token">User token</param>
+        /// <returns></returns>
         [HttpDelete]
         public ActionResult DeleteOwn(int adviceId, [FromHeader] string token)
         {
