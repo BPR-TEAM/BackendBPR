@@ -100,21 +100,7 @@ namespace BackendBPR.Controllers
 
 
            return Ok("Tag removed");
-        }
-
-
-        /// <summary>
-        /// Take this plant
-        /// </summary>
-        /// <param plant="plant"></param>
-        /// <returns>The plant</returns>
-        [HttpPost]
-        public ObjectResult TakePlant(UserPlant plant)
-        {
-           _dbContext.UserPlants.Add(plant);
-           _dbContext.SaveChanges();
-           return Ok("Plant added");
-        }
+        }      
 
         /// <summary>
         /// Get a plant default tags

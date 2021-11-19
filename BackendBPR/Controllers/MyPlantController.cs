@@ -30,6 +30,27 @@ namespace BackendBPR.Controllers
             _dbContext = db;
         }
 
+        /// <summary>
+        /// User takes an existent plant
+        /// </summary>
+        /// <param name="token">User token</param>
+        /// <param name="plant">Userplant - does not require user ID</param>
+        /// <returns>Success message</returns>
+        [HttpPost]
+        public ObjectResult TakePlant([FromHeader] string token, [FromBody] UserPlant plant)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+            
+            plant.UserId = user.Id;
+            
+           _dbContext.UserPlants.Add(plant);
+           _dbContext.SaveChanges();
+
+           return Ok("Plant added");
+        }
+
 
         /// <summary>
         /// Get my plant

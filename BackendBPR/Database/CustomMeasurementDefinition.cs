@@ -6,7 +6,7 @@ namespace BackendBPR.Database
     public class CustomMeasurementDefinition : MeasurementDefinition
     {
         /// <summary>
-        /// The userPlantId that this measurementDefition is attached to
+        /// The userPlantId that this measurementDefinition is attached to
         /// </summary>
         /// <value>Random integer representing the userPlantId</value>
         public int UserPlantId {get;set;}

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BackendBPR.Database
 {
     /// <summary>
@@ -30,5 +32,11 @@ namespace BackendBPR.Database
         /// </summary>
         /// <value>Virtual object</value>
         public virtual User User{ get; set; }
+        /// <summary>
+        /// The boards contained in this dashboard
+        /// </summary>
+        /// <value>Virtual list of boards</value>
+        public virtual ICollection<Board> Boards{ get; set; }
+        
     }
 }

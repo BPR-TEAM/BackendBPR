@@ -24,7 +24,7 @@ namespace BackendBPR.Database
         public virtual User User {get;set;}
         /// <summary>
         /// The advice that this userAdvice action is about - virtual so it needs to 'included'
-        /// when doing LINQ quesries
+        /// when doing LINQ queries
         /// </summary>
         /// <value>Virtual object</value>
         public virtual Advice Advice {get;set;}
