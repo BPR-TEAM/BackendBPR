@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BackendBPR.Database;
 using BackendBPR.Utils;
+using FuzzySharp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -201,6 +202,34 @@ namespace BackendBPR.Controllers
            _dbContext.Measurements.AddRange(measurementsToAdd);
            _dbContext.SaveChanges();
            return Ok("Data is saved properly");
+        }
+
+        /// <summary>
+        /// Search for UserPlants in Profile
+        /// </summary>
+        /// <param name="token">User token </param>
+        /// <param name="name"> Search input</param>
+        /// <returns> Returns the top 5 of the UserPlants that might match the search</returns>
+        [HttpGet]        
+        [Route("search")]
+        public ObjectResult SearchByPlantName([FromHeader] string token, string name)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+            
+            return Ok(_dbContext.UserPlants
+                .Where(userPlant=> userPlant.UserId == user.Id)
+                .Include(userPlant => userPlant.Plant)
+                .AsNoTracking()
+                .AsParallel()
+                .AsEnumerable()
+                .OrderByDescending(userPlant => {
+                    var ratioCommon =  Fuzz.Ratio(name, userPlant.Plant.CommonName);
+                    var ratioScientific =  Fuzz.Ratio(name, userPlant.Plant.ScientificName); 
+                   return ratioCommon > ratioScientific ? ratioCommon : ratioScientific;})
+                .Take(5)
+                .ToList());
         }
     }
 }

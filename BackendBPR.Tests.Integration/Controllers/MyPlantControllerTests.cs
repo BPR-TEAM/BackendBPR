@@ -53,6 +53,24 @@ namespace BackendBPR.Tests.Integration.Controllers
             Assert.Equal("Data is saved properly",message);
         }
 
+        [Fact]
+        public async Task SearchByPlantName(){
+            var client = _factory.CreateClient();
+            client.DefaultRequestHeaders.Add("token","1=ssss");
+            
+            var name = "passion";
+            var url = $"/Plant/MyPlant/search?name={name}";
+
+            
+            var response = await client.GetAsync(url);
+            System.Console.WriteLine(response.Content);
+            var searchResults = ResponseHandler<List<UserPlant>>.GetObject(response);
+
+            Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+            Assert.NotEmpty(searchResults);
+        }
+
+
 
     }
 }
