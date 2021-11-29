@@ -63,7 +63,7 @@ namespace BackendBPR.Controllers
             userAdvice = _dbContext.Advices
             .Include(advice => advice.UserAdvices)
             .Include(advice => advice.Tag)
-            .ThenInclude( tag => tag.Plants)
+              .ThenInclude( tag => tag.Plants)
             .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))
             .AsNoTracking()
             .AsParallel()

@@ -56,10 +56,10 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Get my plant
         /// </summary>
-        /// <param id="plantId"></param>
+        /// <param id="userPlantId"></param>
         /// <returns>The plant</returns>
         [HttpGet]
-        public ObjectResult GetMyPlant([FromHeader] string token, int id)
+        public ObjectResult GetMyPlant([FromHeader] string token, int userPlantId)
         {            
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -68,7 +68,34 @@ namespace BackendBPR.Controllers
                     .Include(p => p.Measurements)
                     .AsNoTracking()
                     .AsParallel()
-                    .FirstOrDefault(a => a.PlantId == id));
+                    .FirstOrDefault(a => a.Id == userPlantId));
+        }
+
+        /// <summary>
+        /// Get my plant
+        /// </summary>
+        /// <param id="plantId">If you want plant specific userPLants send</param>
+        /// <returns>The plant</returns>
+        [HttpGet]        
+        [Route("all")]
+        public ObjectResult GetAllMyPlants([FromHeader] string token, int? plantId)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            if (plantId == null)
+            return Ok( _dbContext.UserPlants
+                    .Include(p => p.Measurements)
+                    .AsNoTracking()
+                    .AsParallel()
+                    .Where(p => p.UserId == user.Id).ToList());
+                    
+            return Ok( _dbContext.UserPlants
+                    .Include(p => p.Measurements)
+                    .AsNoTracking()
+                    .AsParallel()
+                    .Where(p => p.PlantId == plantId && p.UserId == user.Id).ToList());
         }
 
        /// <summary>
@@ -171,7 +198,6 @@ namespace BackendBPR.Controllers
            string[] defintions = csvRows[0].Split(",");
            var md = new List<MeasurementDefinition>();
            var measurementsToAdd = new List<Measurement>();
-
 
 
             foreach (var definition in defintions)

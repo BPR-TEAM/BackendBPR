@@ -43,7 +43,7 @@ namespace BackendBPR.Controllers
         public ObjectResult GetPlant(int id)
         {
            return Ok(_dbContext.Plants
-                    .Include(a => a.Tags)
+                    .Include(a => a.Tags.Where( tags => tags.UserId == null))
                     .AsNoTracking()
                     .AsParallel()
                     .FirstOrDefault(a => a.Id == id));
@@ -137,7 +137,7 @@ namespace BackendBPR.Controllers
                         filteredList.Where(a => a.Tags.Contains(tag)).ToList();
                     }
                     filteredList = _dbContext.Plants
-                    .Include(a => a.Tags)
+                    .Include(a =>  a.Tags.Where( tags => tags.UserId == null))
                     .AsNoTracking()
                     .AsParallel()
                     .Where(a => a.Tags.Any(t => t.Id == tag.Id))
