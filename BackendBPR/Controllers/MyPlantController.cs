@@ -72,10 +72,11 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// Get my plant
+        /// Get all user plants, for a plant or just in general
         /// </summary>
-        /// <param id="plantId">If you want plant specific userPLants send</param>
-        /// <returns>The plant</returns>
+        /// <param name="token">User token</param>
+        /// <param name="plantId">(Optional) Only use this if you want all userPlant of a specific plant</param>
+        /// <returns>A list of the user plants</returns>
         [HttpGet]        
         [Route("all")]
         public ObjectResult GetAllMyPlants([FromHeader] string token, int? plantId)
