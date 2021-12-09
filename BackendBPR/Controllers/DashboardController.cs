@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using BackendBPR.Database;
@@ -30,11 +31,10 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// Get all user plants, for a plant or just in general
+        /// Get all dashboards belonging to a user
         /// </summary>
         /// <param name="token">User token</param>
-        /// <param name="plantId">(Optional) Only use this if you want all userPlant of a specific plant</param>
-        /// <returns>A list of the user plants</returns>
+        /// <returns>A list of the dashboards and its info</returns>
         [HttpGet]        
         [Route("all")]
         public ObjectResult GetAllMyDashboards([FromHeader] string token)
@@ -45,17 +45,18 @@ namespace BackendBPR.Controllers
 
             return Ok( _dbContext.Dashboards
                     .Include(d => d.Boards)
+                    .Include(d => d.UserPlants)            
                     .AsNoTracking()
                     .AsParallel()
                     .Where(d => d.UserId == user.Id).ToList());
         }
 
         /// <summary>
-        /// 
+        /// Creates a dashboard
         /// </summary>
-        /// <param name="token"></param>
-        /// <param name="dahsboard"></param>
-        /// <returns></returns>
+        /// <param name="token">User authentication token</param>
+        /// <param name="dahsboard">Dashboard object (Include UserPlants)</param>
+        /// <returns>response message</returns>
         [HttpPost]
         public ObjectResult CreateDashboard([FromHeader] string token,[FromBody] Dashboard dahsboard){
             _dbContext.Dashboards.Add(dahsboard);
@@ -65,14 +66,14 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Delete an existing dashboard.
         /// </summary>
         /// <param name="token">Authentication token</param>
         /// <param name="id">Dashboard id</param>
-        /// <returns></returns>
+        /// <returns>Response message</returns>
         [HttpDelete]
         public ObjectResult DeleteDashboard([FromHeader] string token,
-                                            int? id)
+                                            int id)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
@@ -86,14 +87,14 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Get a dashboard by its id
         /// </summary>
         /// <param name="token">Authentication token</param>
         /// <param name="id">Dashboard id</param>
-        /// <returns></returns>
+        /// <returns>The dashboard</returns>
         [HttpGet]
         public ObjectResult GetDashboard([FromHeader] string token,
-                                            int? id)
+                                            int id)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
@@ -101,12 +102,19 @@ namespace BackendBPR.Controllers
 
             var dashboard =  _dbContext.Dashboards
             .Include(dash => dash.Boards)
-            .FirstOrDefault(dash => dash.Id == id);
+            .Include(dash => dash.UserPlants)
+            .FirstOrDefault(dash => dash.Id == id && dash.UserId == user.Id);
 
             return Ok(dashboard);            
         }
 
-        [HttpPut]
+        /// <summary>
+        /// Adds a board to a dashboard
+        /// </summary>
+        /// <param name="board">Board object with dashboard id and plant id (necessary)</param>
+        /// <param name="token">User authenticaton token</param>
+        /// <returns>Response message</returns>
+        [HttpPost]
         [Route("board")]
         public ObjectResult AddBoard([FromBody] Board board,[FromHeader] string token){
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
@@ -119,23 +127,67 @@ namespace BackendBPR.Controllers
             return Ok("Added successfully");
         }
 
+        /// <summary>
+        /// Delete the board from the dashboard
+        /// </summary>
+        /// <param name="board">Board object</param>
+        /// <param name="token">User authentication token</param>
+        /// <returns>Response message</returns>
+        [HttpDelete]
         [Route("board")]
-        [HttpPut]
         public ObjectResult RemoveBoard([FromBody] Board board,[FromHeader] string token){
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Boards.Add(board);
+            _dbContext.Boards.Remove(board);
             _dbContext.SaveChanges();
 
             return Ok("Added successfully");
         }
 
-        
+        /// <summary>
+        /// Add plants to a dashboard
+        /// </summary>
+        /// <param name="userPlants">List of plants to add to the dashboard</param>
+        /// <param name="token">User token authentication</param>
+        /// <param name="id">Dashboard's Id</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("plants")]
+        public ObjectResult AddPlants([FromBody] List<UserPlant> userPlants, [FromHeader] string token, int id){
+            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+                return Unauthorized("User/token mismatch");
 
+            var dashboard = _dbContext.Dashboards.Include(dash=> dash.UserPlants).FirstOrDefault(dash => dash.Id == id);
 
+            foreach (UserPlant plant in userPlants){
+                var userPLant =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == plant.Id);
+                dashboard.UserPlants.Add(userPLant);
+            }            
+            _dbContext.SaveChanges();
+            return Ok("All plants added successfully");
+        }
 
-                    
+        /// <summary>
+        /// Remove plant from a dashboard
+        /// </summary>
+        /// <param name="userPlant">User plant to remove from the dashboard</param>
+        /// <param name="token">User token authentication</param>
+        /// <param name="id">Dashboard's Id</param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("plants")]
+        public ObjectResult RemovePlant([FromBody] UserPlant userPlant, [FromHeader] string token, int id){
+            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+                return Unauthorized("User/token mismatch");
+
+            var dashboard = _dbContext.Dashboards.Include(dash=> dash.UserPlants).FirstOrDefault(dash => dash.Id == id);
+            var userPlantToRemove =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == userPlant.Id);
+            dashboard.UserPlants.Remove(userPlantToRemove);            
+            _dbContext.SaveChanges();
+
+            return Ok("All plants removed successfully");
+        }               
     }
 }

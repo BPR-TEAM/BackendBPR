@@ -37,6 +37,11 @@ namespace BackendBPR.Database
         /// </summary>
         /// <value>Virtual list of boards</value>
         public virtual ICollection<Board> Boards{ get; set; }
+        /// <summary>
+        /// User plants present in this dashboard
+        /// </summary>
+        /// <value>Virtual list of user plants</value>
+        public virtual ICollection<UserPlant> UserPlants {get;set;}
         
     }
 }
