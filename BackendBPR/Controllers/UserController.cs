@@ -34,20 +34,20 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Gets the current user by the token provided
         /// </summary>
-        /// <param name="token">The token to match the user to</param>
+        /// <param name="_token">The token to match the user to</param>
         /// <returns>The user whose token matches the one provided</returns>
         [HttpGet]
         [Route("/profile")]
-        public ObjectResult GetCurrentUser([FromHeader] string token)
+        public ObjectResult GetCurrentUser([FromHeader] string _token)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
             User user = new User();
             try
             {
-                string actualToken = token.Split('=')[1];
-                user = _dbContext.Users.FirstOrDefault(user => user.Token == actualToken);
+                string trueToken = _token.Split('=')[1];
+                user = _dbContext.Users.FirstOrDefault(user => user.Token == trueToken);
                 return Ok(user);
             }
             catch(Exception)
@@ -68,7 +68,14 @@ namespace BackendBPR.Controllers
             if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Users.Update(_dbContext.Users.FirstOrDefault(oldUser => oldUser.Token == user.Token));
+            if(!user.Image.Equals(null))
+            {
+                if(!ControllerUtilities.isImage(user.Image, 5242880))
+                    return BadRequest("This isn't an image");
+            }
+
+            int trueId = Convert.ToInt32(user.Token.Split('=')[1]);
+            _dbContext.Users.Update(_dbContext.Users.FirstOrDefault(oldUser => oldUser.Id == trueId));
             _dbContext.SaveChanges();
             return Ok("Profile updated successfully");
         }
@@ -76,134 +83,203 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Upload an image by passing it through a user object
         /// </summary>
-        /// <param name="user">The user to whom the image should be attached - matched by token</param>
+        /// <param name="_token">The user token to whom the image should be attached - matched by token</param>
+        /// <param name="_image">The image represented in base64 string</param>
         /// <returns>Whether or not the image was uploaded</returns>
         [HttpPost]
         [Route("/profile")]
-        public ObjectResult UploadImage([FromBody] User user)
+        public ObjectResult UploadImage([FromHeader] string _token, [FromBody] string _image)
         {
-            if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            User currentUser = _dbContext.Users.FirstOrDefault(currentUser => currentUser.Token == user.Token);
-            currentUser.Image = user.Image;
-            _dbContext.Users.Update(currentUser);
-            _dbContext.SaveChanges();
-            return Ok("Image was uploaded");
+            byte[] image = Convert.FromBase64String(_image);
+            if(!ControllerUtilities.isImage(image, 5242880))
+                return BadRequest("This isn't an image");
+
+            try
+            {
+                user.Image = image;
+                _dbContext.Users.Update(user);
+                _dbContext.SaveChanges();
+                return Ok("Image was uploaded");
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
+
         }
 
         /// <summary>
         /// Deletes the user profile that corresponds to the token
         /// </summary>
-        /// <param name="token">The token to which to match the user</param>
+        /// <param name="_token">The token to which to match the user</param>
         /// <returns>Whether or not the user profile was deleted</returns>
         [HttpDelete]
         [Route("/profile")]
-        public ObjectResult DeleteProfile([FromHeader] string token)
+        public ObjectResult DeleteProfile([FromHeader] string _token)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Users.Remove(_dbContext.Users.FirstOrDefault(user => user.Token == token));
-            _dbContext.SaveChanges();
-            return Ok("Profile deleted successfully");
+            try
+            {
+                _dbContext.Users.Remove(user);
+                _dbContext.SaveChanges();
+                return Ok("Profile deleted successfully");
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
+
         }
 
         /// <summary>
         /// Gets all the notes that correspond to the provided token
         /// </summary>
-        /// <param name="token">The token to which to match the user</param>
+        /// <param name="_token">The token to which to match the user</param>
         /// <returns>The notes that the matched user has</returns>
         [HttpGet]
         [Route("/profile/notes")]
-        public ObjectResult GetNotes([FromHeader] string token)
+        public ObjectResult GetNotes([FromHeader] string _token)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            //This LINQ makes sense but I feel like it's going to want me to use "Include" somewhere in it
             List<Note> notes =  new List<Note>();
-            notes = (List<Note>) _dbContext.Notes
-            .Where(notes => notes.UserId == _dbContext.Users
-            .FirstOrDefault(user => user.Token == token).Id);
-            return Ok(notes);
+            try
+            {
+                notes = (List<Note>) _dbContext.Notes.Where(notes => notes.UserId == user.Id);
+                return Ok(notes);
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
         }
 
         /// <summary>
         /// Gets a certain note that corresponds to the parsed user token and the note id
         /// </summary>
-        /// <param name="token">The user token to match to</param>
-        /// <param name="id">The note id to match to</param>
+        /// <param name="_token">The user token to match to</param>
+        /// <param name="_id">The note id to match to</param>
         /// <returns>The note that was requested</returns>
         [HttpGet]
         [Route("/profile/note")]
-        public ObjectResult GetNote([FromHeader] string token, int id)
+        public ObjectResult GetNote([FromHeader] string _token, int _id)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            Note note = new Note(); 
-            note = _dbContext.Notes.FirstOrDefault(note => note.Id == id && note.UserId == _dbContext.Users
-            .FirstOrDefault(user => user.Token == token).Id);
-            return Ok(note);
-        }
+            Note note = new Note();
+            try
+            {
+                note = _dbContext.Notes.FirstOrDefault(note => note.Id == _id && note.UserId == user.Id);
+                return Ok(note);
+            } 
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
 
+        }
+        
         /// <summary>
-        /// Adds a note to the corresponding user that matches the token parsed in the object
+        /// Adds a note to the corresponding user that matches the token
         /// </summary>
-        /// <param name="user">The user to add the note to</param>
+        /// <param name="_token">The users' token to add to</param>
+        /// <param name="_note">The note to add</param>
         /// <returns>Whether or not the note was added</returns>
         [HttpPost]
         [Route("/profile/note")]
-        public ObjectResult AddNote([FromBody] User user)
+        public ObjectResult AddNote([FromHeader] String _token, [FromBody] Note _note)
         {
-            if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            //This LINQ makes sense but I feel like it's going to want me to use "Include" somewhere in it
-            _dbContext.Users.Include(currentUser => currentUser.Notes).FirstOrDefault(currentUser => currentUser.Token == user.Token)
-            .Notes.Add(user.Notes.First());
-            _dbContext.SaveChanges();
-            return Ok("The note has been added successfully");
+            string trueID = _token.Split('=')[0];
+            try
+            {
+                _note.UserId = Convert.ToInt32(trueID);
+                _dbContext.Notes.Add(_note);
+                _dbContext.SaveChanges();
+                return Ok("The note has been added successfully");
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
         }
-
         /// <summary>
         /// Updates a note by the corresponding parsed user token and the note id
         /// </summary>
-        /// <param name="user">The user to update the note to</param>
-        /// <param name="id">The note id to update</param>
+        /// <param name="_token">The user token to update the note to</param>
+        /// <param name="_note">The note to update</param>
         /// <returns>Whether or not the note was updated</returns>
         [HttpPut]
         [Route("/profile/note")]
-        public ObjectResult EditNote([FromBody] User user, int id)
+        public ObjectResult EditNote([FromHeader] string _token, [FromBody] Note _note)
         {
-            if(!ControllerUtilities.TokenVerification(user.Token, _dbContext))
+            if(!ControllerUtilities.TokenVerification(_token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            //This LINQ makes sense but I feel like it's going to want me to use "Include" somewhere in it
-            _dbContext.Users.Include(currentUser => currentUser.Notes).FirstOrDefault(currentUser => currentUser.Token == user.Token).Notes.FirstOrDefault(note => note.Id == id)
-            .Text = user.Notes.First().Text;
-            _dbContext.SaveChanges();
-            return Ok("The note has been edited successfully");
+            string trueID = _token.Split('=')[0];
+            try
+            {
+                _note.UserId = Convert.ToInt32(trueID);
+                _dbContext.Notes.Update(_note);
+                _dbContext.SaveChanges();
+                return Ok("The note has been edited successfully");
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
         }
 
         /// <summary>
         /// Deletes a note that corresponds to the parsed user token and note id
         /// </summary>
-        /// <param name="token">The user token to match to</param>
-        /// <param name="id">The note id to match to</param>
+        /// <param name="_token">The user token to match to</param>
+        /// <param name="_id">The note id to match to</param>
         /// <returns>Whether or not the note was deleted</returns>
         [HttpDelete]
         [Route("/profile/note")]
-        public ObjectResult DeleteNote([FromHeader] string token, int id)
+        public ObjectResult DeleteNote([FromHeader] string _token, int _id)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Notes.Remove(_dbContext.Notes.FirstOrDefault(note => note.Id == id && note.UserId == _dbContext.Users
-            .FirstOrDefault(user => user.Token == token).Id));
-            _dbContext.SaveChanges();
-            return Ok("The note has been deleted successfully");
+            try
+            {
+                _dbContext.Notes.Remove(_dbContext.Notes.FirstOrDefault(note => note.Id == _id && note.UserId == user.Id));
+                _dbContext.SaveChanges();
+                return Ok("The note has been deleted successfully");
+            }
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
         }
     }
     
