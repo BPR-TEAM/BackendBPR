@@ -27,7 +27,7 @@ namespace BackendBPR.Tests.Integration.Controllers
 
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Add("token","1=ssss");
-            var  userPlant =new UserPlant(){Id = 5};
+            var  userPlant =new UserPlant(){Id = 4};
             var id = 1;
             var url = $"Dashboard/plants?id={id}";
 
@@ -39,9 +39,10 @@ namespace BackendBPR.Tests.Integration.Controllers
             var response = await client.SendAsync(request);           
             var message = await response.Content.ReadAsStringAsync();
 
-            var dashboard = db.Dashboards.Include(d => d.UserPlants).FirstOrDefault(d => d.Id == id);
+            var dashboard = db.Dashboards.Include(d => d.UserPlants).Include(d => d.Boards).FirstOrDefault(d => d.Id == id);
 
-            Assert.Equal(1,dashboard.UserPlants.Count());
+            Assert.Equal(0,dashboard.UserPlants.Count());
+            Assert.Equal(0,dashboard.Boards.Count());
         }
 
 

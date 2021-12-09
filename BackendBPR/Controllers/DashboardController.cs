@@ -182,9 +182,19 @@ namespace BackendBPR.Controllers
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            var dashboard = _dbContext.Dashboards.Include(dash=> dash.UserPlants).FirstOrDefault(dash => dash.Id == id);
+            var dashboard = _dbContext.Dashboards
+            .Include(dash=> dash.UserPlants)
+            .Include(dash => dash.Boards)
+            .FirstOrDefault(dash => dash.Id == id);
+
             var userPlantToRemove =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == userPlant.Id);
-            dashboard.UserPlants.Remove(userPlantToRemove);            
+            dashboard.UserPlants.Remove(userPlantToRemove);      
+
+            if(!dashboard.UserPlants.Any(p=> p.PlantId == userPlantToRemove.PlantId)){
+                var boardsToRemove = dashboard.Boards.Where(b => b.PlantId == userPlantToRemove.PlantId);
+                foreach (Board board in boardsToRemove)
+                  dashboard.Boards.Remove(board);
+            }
             _dbContext.SaveChanges();
 
             return Ok("All plants removed successfully");

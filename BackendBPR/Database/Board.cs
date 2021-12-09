@@ -21,7 +21,7 @@ namespace BackendBPR.Database
         /// <value>Random integer representing the dashboardId</value>
         public int DashboardId { get; set; }
         /// <summary>
-        /// The graphical type of this board - i.e gauge, bar, pie chart, etc
+        /// The graph type and measurement. The format should follow this example: "barChart,CO2"
         /// </summary>
         /// <value>Plain text</value>
         public string Type { get; set; }

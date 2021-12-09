@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using BackendBPR.Database;
@@ -5,6 +6,7 @@ using BackendBPR.Utils;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using AutoMapper;
 
 namespace BackendBPR.Controllers
 {
@@ -16,6 +18,7 @@ namespace BackendBPR.Controllers
     public class AdviceController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
+        private readonly IMapper _mapper;
         private readonly OrangeBushContext _dbContext;
 
         /// <summary>
@@ -23,10 +26,11 @@ namespace BackendBPR.Controllers
         /// </summary>
         /// <param name="logger">The logger to use</param>
         /// <param name="db">The database context to query</param>
-        public AdviceController(ILogger<AuthController> logger, OrangeBushContext db)
+        public AdviceController(ILogger<AuthController> logger, IMapper mapper, OrangeBushContext db)
         {
             _logger = logger;
             _dbContext = db;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -54,19 +58,21 @@ namespace BackendBPR.Controllers
         /// <param name="token">User token</param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(typeof(List<CustomAdvice>),200)]
         public ActionResult GetAdvice(int plantId,[FromHeader] string token)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            var userAdvice = new List<Advice>();
+            var userAdvice = new List<CustomAdvice>();
             userAdvice = _dbContext.Advices
             .Include(advice => advice.UserAdvices)
             .Include(advice => advice.Tag)
               .ThenInclude( tag => tag.Plants)
-            .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))
+            .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))            
             .AsNoTracking()
             .AsParallel()
+            .Select(a => _mapper.Map<CustomAdvice>(a))
             .ToList();
 
             return Ok(userAdvice);
@@ -90,7 +96,7 @@ namespace BackendBPR.Controllers
             var userAdvice = _dbContext.UserAdvices.FirstOrDefault(a => a.AdviceId == adviceId && a.UserId == user.Id);
             if(userAdvice == null){
                 _dbContext.UserAdvices.Add(new UserAdvice(){
-                    AdviceId =adviceId,
+                    AdviceId = adviceId,
                     UserId = user.Id,
                     Type = vote
                 });

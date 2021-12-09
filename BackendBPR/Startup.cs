@@ -48,6 +48,8 @@ namespace BackendBPR
 
             services.AddDbContext<OrangeBushContext>(options 
                 => options.UseNpgsql(Configuration.GetConnectionString("AzurePgDB")));
+
+            services.AddAutoMapper(typeof(MapperProfile));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline. 🦍

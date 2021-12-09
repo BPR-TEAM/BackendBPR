@@ -55,7 +55,7 @@ namespace BackendBPR.Tests.Integration.Controllers
             var url = $"/Advice?plantId={id}";
 
             var response = await client.GetAsync(url);
-            var result = ResponseHandler<List<Advice>>.GetObject(response);
+            var result = ResponseHandler<List<CustomAdvice>>.GetObject(response);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.True(result[0].Tag.Plants.Any(p => p.Id == id));
