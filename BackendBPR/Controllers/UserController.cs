@@ -46,7 +46,8 @@ namespace BackendBPR.Controllers
             User user = new User();
             try
             {
-                user = _dbContext.Users.FirstOrDefault(user => user.Token == token);
+                string actualToken = token.Split('=')[1];
+                user = _dbContext.Users.FirstOrDefault(user => user.Token == actualToken);
                 return Ok(user);
             }
             catch(Exception)
