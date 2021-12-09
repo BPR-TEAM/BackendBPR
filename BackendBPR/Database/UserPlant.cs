@@ -50,5 +50,10 @@ namespace BackendBPR.Database
         /// </summary>
         /// <value>Virtual collection object</value>
         public virtual ICollection<Measurement> Measurements {get;set;}
+        /// <summary>
+        /// The collection of Dashboard that this user plant  is part of
+        /// </summary>
+        /// <value>Virtual collection object</value>
+        public virtual ICollection<Dashboard> Dashboards {get;set;}
     }
 }

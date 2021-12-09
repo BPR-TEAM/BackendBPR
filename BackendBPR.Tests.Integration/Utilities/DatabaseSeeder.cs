@@ -20,7 +20,8 @@ namespace BackendBPR.Tests.Integration.Utilities
             SeedUsers();
             SeedPlantsWithTags();  
             SeedMeasurementDefintionsAndUserPlant();  
-            SeedAdvices();              
+            SeedAdvices();
+            SeedDashboard();            
         }
 
         private static void SeedUsers()
@@ -154,6 +155,31 @@ namespace BackendBPR.Tests.Integration.Utilities
 
             OBDB.Advices.AddRange(advice,generalAdvice,generalAdvice1,generalAdvice2);
             OBDB.UserAdvices.AddRange(userAdvice,userAdvice1,userAdvice2);
+            OBDB.SaveChanges();
+        }
+
+        private static void SeedDashboard(){
+            var plant = new UserPlant(){
+                Id = 4,
+                UserId = 1,
+                PlantId = 1,
+                Name = "Man Passion Fruit"                
+            };
+            var board = new Board(){
+                PlantId = 1,
+                DashboardId = 1,
+                Type = "CO2-BarGraph"
+            };
+            var dashboard = new Dashboard(){
+                Id = 1,
+                UserId = 1,
+                UserPlants = new List<UserPlant>(){plant},
+                Name = "My garden",
+                Description = "Garden that I own in the kitchen"
+            };
+            OBDB.UserPlants.Add(plant);
+            OBDB.Dashboards.Add(dashboard);
+            OBDB.Boards.Add(board);
             OBDB.SaveChanges();
         }
 
