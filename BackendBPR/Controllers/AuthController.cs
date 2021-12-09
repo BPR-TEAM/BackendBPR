@@ -129,6 +129,8 @@ namespace BackendBPR.Controllers
         /// </summary>
         /// <param name="_data">A list of meta data of the user, the first parameter is assumed to be the password</param>
         /// <returns>An object with data about the password - strength, entropy, time-to-crack etc</returns>
+        [HttpPut]
+        [Route("PasswordStrength")]
         public ObjectResult PasswordStrengthCheck([FromBody] List<String> _data)
         {
             String password = _data[0];
