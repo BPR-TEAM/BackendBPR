@@ -44,6 +44,9 @@ namespace BackendBPR.Controllers
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
             
+            if(!ControllerUtilities.isImage(plant.Image, 5242880))
+                return BadRequest("The plant image is not an image");
+
             plant.UserId = user.Id;
             
            _dbContext.UserPlants.Add(plant);
@@ -111,6 +114,9 @@ namespace BackendBPR.Controllers
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
+            if(!ControllerUtilities.isImage(plant.Image, 5242880))
+                return BadRequest("The plant image is not an image");
+                
            var userPlant = _dbContext.UserPlants
            .AsParallel()
            .FirstOrDefault(a => a.PlantId == plant.Id);

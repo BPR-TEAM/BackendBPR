@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using BackendBPR.Database;
 using BackendBPR.Utils;
+using System.Collections.Generic;
 
 
 [assembly:InternalsVisibleTo("BackendBPR.Tests.Integration")]
@@ -121,6 +122,20 @@ namespace BackendBPR.Controllers
                 return BadRequest("User or token do not exist");
             }
             
+        }
+
+        /// <summary>
+        /// Checks the password strength using zxcvbn
+        /// </summary>
+        /// <param name="_data">A list of meta data of the user, the first parameter is assumed to be the password</param>
+        /// <returns>An object with data about the password - strength, entropy, time-to-crack etc</returns>
+        [HttpPut]
+        [Route("PasswordStrength")]
+        public ObjectResult PasswordStrengthCheck([FromBody] List<String> _data)
+        {
+            String password = _data[0];
+            _data.RemoveAt(0);
+            return Ok(ControllerUtilities.passwordResult(password, _data));
         }
 
         [NonAction]
