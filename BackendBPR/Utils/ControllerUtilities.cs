@@ -171,7 +171,7 @@ namespace BackendBPR.Utils
                         return false;
 
                     //Check if over the max size
-                    if (_image.Length < _maxSizeBytes)
+                    if (_image.Length > _maxSizeBytes)
                         return false;
                     
                     //Check if bytes correspond to an image format encoding
