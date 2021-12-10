@@ -37,10 +37,15 @@ namespace BackendBPR.Database
         /// <value>Integer</value>
         public int Dislikes {get;set;}
         /// <summary>
-        /// Id of the user that crated this advice
+        /// Name of the user that created this advice
         /// </summary>
-        /// <value>Integer</value>
-        public int CreatorId {get;set;}
+        /// <value>String</value>
+        public string CreatorName {get;set;}
+        /// <summary>
+        /// Image of the creator
+        /// </summary>
+        /// <value>Byte array with the image</value>
+        public byte[] CreatorImage {get;set;}
         /// <summary>
         /// Current user's role
         /// </summary>

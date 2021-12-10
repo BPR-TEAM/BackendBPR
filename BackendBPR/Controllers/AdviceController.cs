@@ -69,14 +69,19 @@ namespace BackendBPR.Controllers
             var userAdvice = new List<CustomAdvice>();
             userAdvice = _dbContext.Advices
             .Include(advice => advice.UserAdvices)
+              .ThenInclude(userAdvice => userAdvice.User)
             .Include(advice => advice.Tag)
               .ThenInclude( tag => tag.Plants)
             .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))            
             .AsNoTracking()
+            .AsSplitQuery()
             .AsParallel()
             .Select(a => {
                 var customAdvice = _mapper.Map<CustomAdvice>(a);
-                customAdvice.CurrentUserRole = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id).Type;
+                var userAdvice = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id);
+                if(userAdvice != null){
+                    customAdvice.CurrentUserRole = userAdvice.Type;
+                }
                 return customAdvice;
             })
             .ToList();
