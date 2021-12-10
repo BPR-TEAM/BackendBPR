@@ -138,6 +138,8 @@ namespace BackendBPR.Controllers
                 return Unauthorized("User/token mismatch");
 
             _dbContext.Advices.Add(advice);
+            _dbContext.SaveChanges();
+
             _dbContext.UserAdvices.Add(new UserAdvice {
                 UserId = user.Id,
                 AdviceId = advice.Id,

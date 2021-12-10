@@ -160,7 +160,7 @@ namespace BackendBPR.Controllers
             List<Note> notes =  new List<Note>();
             try
             {
-                notes = (List<Note>) _dbContext.Notes.Where(notes => notes.UserId == user.Id);
+                notes = _dbContext.Notes.Where(notes => notes.UserId == user.Id).ToList();
                 return Ok(notes);
             }
             catch(Exception)
@@ -190,6 +190,35 @@ namespace BackendBPR.Controllers
             {
                 note = _dbContext.Notes.FirstOrDefault(note => note.Id == _id && note.UserId == user.Id);
                 return Ok(note);
+            } 
+            catch(Exception)
+            {
+                return BadRequest("Something went wrong");
+            }
+
+        }
+
+        /// <summary>
+        /// Gets certain notes that correspond to the parsed user token and the plantID
+        /// </summary>
+        /// <param name="_token">The user token to match to</param>
+        /// <param name="_plantId">The plant id to match to</param>
+        /// <returns>The note that was requested</returns>
+        [HttpGet]
+        [Route("/profile/notesbyplant")]
+        public ObjectResult GetNotesByPlant([FromHeader] string _token, int _plantId)
+        {
+            User user;
+            bool isVerified;
+            ControllerUtilities.TokenVerification(_token, _dbContext, out user, out isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            List<Note> notes = new List<Note>();
+            try
+            {
+                notes = _dbContext.Notes.Where(note => note.PlantId == _plantId && note.UserId == user.Id).ToList();
+                return Ok(notes);
             } 
             catch(Exception)
             {
