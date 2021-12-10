@@ -202,7 +202,7 @@ namespace BackendBPR.Controllers
         /// Gets certain notes that correspond to the parsed user token and the plantID
         /// </summary>
         /// <param name="_token">The user token to match to</param>
-        /// <param name="_plantId">The note id to match to</param>
+        /// <param name="_plantId">The plant id to match to</param>
         /// <returns>The note that was requested</returns>
         [HttpGet]
         [Route("/profile/notesbyplant")]
