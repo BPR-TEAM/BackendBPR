@@ -160,7 +160,7 @@ namespace BackendBPR.Controllers
             List<Note> notes =  new List<Note>();
             try
             {
-                notes = (List<Note>) _dbContext.Notes.Where(notes => notes.UserId == user.Id);
+                notes = _dbContext.Notes.Where(notes => notes.UserId == user.Id).ToList();
                 return Ok(notes);
             }
             catch(Exception)
@@ -217,7 +217,7 @@ namespace BackendBPR.Controllers
             List<Note> notes = new List<Note>();
             try
             {
-                notes = (List<Note>) _dbContext.Notes.Where(note => note.PlantId == _plantId && note.UserId == user.Id);
+                notes = _dbContext.Notes.Where(note => note.PlantId == _plantId && note.UserId == user.Id).ToList();
                 return Ok(notes);
             } 
             catch(Exception)
