@@ -25,6 +25,7 @@ namespace BackendBPR.Controllers
         /// Constructor for instantiating the controller
         /// </summary>
         /// <param name="logger">The logger to use</param>
+        /// <param name="mapper">The mapper to map advice to custom advice</param>
         /// <param name="db">The database context to query</param>
         public AdviceController(ILogger<AuthController> logger, IMapper mapper, OrangeBushContext db)
         {
@@ -61,7 +62,8 @@ namespace BackendBPR.Controllers
         [ProducesResponseType(typeof(List<CustomAdvice>),200)]
         public ActionResult GetAdvice(int plantId,[FromHeader] string token)
         {
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
             var userAdvice = new List<CustomAdvice>();
@@ -72,7 +74,11 @@ namespace BackendBPR.Controllers
             .Where( a => a.Tag.Plants.Any(a => a.Id == plantId))            
             .AsNoTracking()
             .AsParallel()
-            .Select(a => _mapper.Map<CustomAdvice>(a))
+            .Select(a => {
+                var customAdvice = _mapper.Map<CustomAdvice>(a);
+                customAdvice.CurrentUserRole = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id).Type;
+                return customAdvice;
+            })
             .ToList();
 
             return Ok(userAdvice);

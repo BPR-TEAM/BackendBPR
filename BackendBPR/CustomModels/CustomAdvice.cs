@@ -39,7 +39,12 @@ namespace BackendBPR.Database
         /// <summary>
         /// Id of the user that crated this advice
         /// </summary>
-        /// <value>AdviceRole enumerator</value>
+        /// <value>Integer</value>
         public int CreatorId {get;set;}
+        /// <summary>
+        /// Current user's role
+        /// </summary>
+        /// <value>AdviceRole enumerator</value>
+        public AdviceRole CurrentUserRole {get;set;}
     }
 }
