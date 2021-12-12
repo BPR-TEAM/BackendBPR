@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using AutoMapper;
+using BackendBPR.ApiModels;
 using BackendBPR.Database;
 using BackendBPR.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +20,18 @@ namespace BackendBPR.Controllers
     public class DashboardController : ControllerBase
     {
         private readonly ILogger<DashboardController> _logger;
+        private readonly IMapper _mapper;
         private readonly OrangeBushContext _dbContext;
         /// <summary>
         /// Constructor for instantiating the controller
         /// </summary>
         /// <param name="logger">The logger to use</param>
+        /// <param name="mapper">The mapper to use</param>
         /// <param name="db">The database context to query</param>
-        public DashboardController(ILogger<DashboardController> logger, OrangeBushContext db)
+        public DashboardController(ILogger<DashboardController> logger, IMapper mapper, OrangeBushContext db)
         {
             _logger = logger;
+            _mapper = mapper;
             _dbContext = db;
         }
 
@@ -58,8 +63,9 @@ namespace BackendBPR.Controllers
         /// <param name="dahsboard">Dashboard object (Include UserPlants)</param>
         /// <returns>response message</returns>
         [HttpPost]
-        public ObjectResult CreateDashboard([FromHeader] string token,[FromBody] Dashboard dahsboard){
-            _dbContext.Dashboards.Add(dahsboard);
+        public ObjectResult CreateDashboard([FromHeader] string token,[FromBody] CreateDashboardApi dahsboard)
+        {
+            _dbContext.Dashboards.Add(_mapper.Map<Dashboard>(dahsboard));
             _dbContext.SaveChanges();
 
             return Ok("Saved successfully");            
@@ -111,17 +117,18 @@ namespace BackendBPR.Controllers
         /// <summary>
         /// Adds a board to a dashboard
         /// </summary>
-        /// <param name="board">Board object with dashboard id and plant id (necessary)</param>
+        /// <param name="board">Board object - Only is ID is unnecessary</param>
         /// <param name="token">User authenticaton token</param>
         /// <returns>Response message</returns>
         [HttpPost]
         [Route("board")]
-        public ObjectResult AddBoard([FromBody] Board board,[FromHeader] string token){
+        public ObjectResult AddBoard([FromBody] BoardApi board,[FromHeader] string token){
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Boards.Add(board);
+            var boardDb = _mapper.Map<Board>(board);
+            _dbContext.Boards.Add(boardDb);
             _dbContext.SaveChanges();
 
             return Ok("Added successfully");
@@ -135,12 +142,13 @@ namespace BackendBPR.Controllers
         /// <returns>Response message</returns>
         [HttpDelete]
         [Route("board")]
-        public ObjectResult RemoveBoard([FromBody] Board board,[FromHeader] string token){
+        public ObjectResult RemoveBoard([FromBody] BoardApi board,[FromHeader] string token){
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.Boards.Remove(board);
+            var boardDb = _mapper.Map<Board>(board);
+            _dbContext.Boards.Remove(boardDb);
             _dbContext.SaveChanges();
 
             return Ok("Added successfully");
@@ -178,7 +186,7 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Route("plants")]
-        public ObjectResult RemovePlant([FromBody] UserPlant userPlant, [FromHeader] string token, int id){
+        public ObjectResult RemovePlant([FromBody] UserPlantApi userPlant, [FromHeader] string token, int id){
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 

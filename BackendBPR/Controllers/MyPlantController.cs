@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
+using BackendBPR.ApiModels;
 using BackendBPR.Database;
 using BackendBPR.Utils;
 using FuzzySharp;
@@ -18,16 +20,19 @@ namespace BackendBPR.Controllers
     public class MyPlantController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
+        private readonly IMapper _mapper;
         private readonly OrangeBushContext _dbContext;
 
         /// <summary>
         /// Constructor for the controller
         /// </summary>
         /// <param name="logger">Logger</param>
+        /// <param name="mapper"></param>
         /// <param name="db">Database</param>
-        public MyPlantController(ILogger<AuthController> logger, OrangeBushContext db)
+        public MyPlantController(ILogger<AuthController> logger, IMapper mapper, OrangeBushContext db)
         {
             _logger = logger;
+            _mapper = mapper;
             _dbContext = db;
         }
 
@@ -38,7 +43,7 @@ namespace BackendBPR.Controllers
         /// <param name="plant">Userplant - does not require user ID</param>
         /// <returns>Success message</returns>
         [HttpPost]
-        public ObjectResult TakePlant([FromHeader] string token, [FromBody] UserPlant plant)
+        public ObjectResult TakePlant([FromHeader] string token, [FromBody] UserPlantApi plant)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
@@ -47,9 +52,11 @@ namespace BackendBPR.Controllers
             if(!ControllerUtilities.isImage(plant.Image, 5242880))
                 return BadRequest("The plant image is not an image");
 
-            plant.UserId = user.Id;
+            var plantDb = _mapper.Map<UserPlant>(plant);
+
+            plantDb.UserId = user.Id;
             
-           _dbContext.UserPlants.Add(plant);
+           _dbContext.UserPlants.Add(plantDb);
            _dbContext.SaveChanges();
 
            return Ok("Plant added");
@@ -109,7 +116,7 @@ namespace BackendBPR.Controllers
        /// <param name="token">authentication token</param>
        /// <returns>user plant</returns>
         [HttpPut]
-        public ObjectResult EditPlantInfo([FromHeader] string token, [FromBody] UserPlant plant)
+        public ObjectResult EditPlantInfo([FromHeader] string token, [FromBody] UserPlantApi plant)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -176,12 +183,14 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpPut]        
         [Route("{userPlantId}")]
-        public ObjectResult AddMeasurementDefinition([FromHeader] string token,[FromBody] CustomMeasurementDefinition measurementDefinition, int userPlantId)
+        public ObjectResult AddMeasurementDefinition([FromHeader] string token,[FromBody] CustomMeasurementDefinitionApi measurementDefinition, int userPlantId)
         {
             if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            _dbContext.MeasurementDefinitions.Add(measurementDefinition);
+            var measurementDefintionDb = _mapper.Map<CustomMeasurementDefinition>(measurementDefinition);
+
+            _dbContext.MeasurementDefinitions.Add(measurementDefintionDb);
             _dbContext.SaveChanges();
            return Ok("Measurement  definition added");
         }

@@ -1,12 +1,13 @@
 using System.Linq;
 using AutoMapper;
+using BackendBPR.ApiModels;
 using BackendBPR.Database;
 
 internal class MapperProfile : Profile
 {
     public MapperProfile()
     {
-        CreateMap<Advice, CustomAdvice>()
+        CreateMap<Advice, AdviceExtendedApi>()
             .ForMember(advice => advice.Likes, cfg => cfg.MapFrom(
                 a => a.UserAdvices.Where( userAdvice => userAdvice.Type == AdviceRole.Like).Count()))
             .ForMember(advice => advice.Dislikes, cfg => cfg.MapFrom(
@@ -17,5 +18,19 @@ internal class MapperProfile : Profile
             .ForMember(advice => advice.CreatorImage, cfg => cfg.MapFrom(
                 (a,c) => {var user = a.UserAdvices.FirstOrDefault(u => u.Type == AdviceRole.Creator).User;
                 return user != null ? user.Image : new byte[0];}));
+        CreateMap<Advice,GiveAdviceApi>().ReverseMap();
+
+        CreateMap<RegisterUserApi,User>();
+
+        CreateMap<CreateDashboardApi, Dashboard>();
+
+        CreateMap<UserPlantApi, UserPlant>();
+
+        CreateMap<CustomMeasurementDefinitionApi, CustomMeasurementDefinition>();
+
+        CreateMap<NoteApi, Note>();
+
+        CreateMap<BoardApi, Board>();
+
     }
 }

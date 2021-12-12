@@ -8,7 +8,8 @@ using Microsoft.Extensions.Logging;
 using BackendBPR.Database;
 using BackendBPR.Utils;
 using System.Collections.Generic;
-
+using AutoMapper;
+using BackendBPR.ApiModels;
 
 [assembly:InternalsVisibleTo("BackendBPR.Tests.Integration")]
 namespace BackendBPR.Controllers
@@ -21,15 +22,18 @@ namespace BackendBPR.Controllers
     public class AuthController: ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
+        private readonly IMapper _mapper;
         private readonly OrangeBushContext _dbContext;
         /// <summary>
         /// Constructor for instantiating the controller
         /// </summary>
         /// <param name="logger">The logger to use</param>
+        /// <param name="mapper">The mapper for api models</param>
         /// <param name="db">The database context to query</param>
-        public AuthController(ILogger<AuthController> logger, OrangeBushContext db)
+        public AuthController(ILogger<AuthController> logger,IMapper mapper, OrangeBushContext db)
         {
             _logger = logger;
+            _mapper = mapper;
             _dbContext = db;
         }
 
@@ -41,9 +45,10 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Register")]
-        public ObjectResult Register([FromBody] User user)
+        public ObjectResult Register([FromBody] RegisterUserApi user)
         {
-            var password = user.PasswordHash;
+            var userDb = _mapper.Map<User>(user);            
+            var password = userDb.PasswordHash;
             
             byte[] salt = new byte[128 / 8];
             using (var rng = RandomNumberGenerator.Create())
@@ -51,9 +56,9 @@ namespace BackendBPR.Controllers
                 rng.GetBytes(salt);
             }
             
-            user.PasswordHash = HashPassword(salt, password);
-            user.PasswordSalt =salt;
-            _dbContext.Users.Add(user);
+            userDb.PasswordHash = HashPassword(salt, password);
+            userDb.PasswordSalt =salt;
+            _dbContext.Users.Add(userDb);
             _dbContext.SaveChanges();
             return Ok("Registration complete!");
         }
@@ -69,7 +74,7 @@ namespace BackendBPR.Controllers
         [HttpPost]
         [Route("Login")]
         [ProducesResponseType(typeof(string),200)]
-        public ObjectResult Login([FromBody] User user)
+        public ObjectResult Login([FromBody] LoginUserApi user)
         {
             if (String.IsNullOrEmpty(user.PasswordHash) || String.IsNullOrEmpty(user.Email))
             {

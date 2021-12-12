@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using AutoMapper;
+using BackendBPR.ApiModels;
 
 namespace BackendBPR.Controllers
 {
@@ -59,14 +60,14 @@ namespace BackendBPR.Controllers
         /// <param name="token">User token</param>
         /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(List<CustomAdvice>),200)]
+        [ProducesResponseType(typeof(List<AdviceExtendedApi>),200)]
         public ActionResult GetAdvice(int plantId,[FromHeader] string token)
         {
             ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            var userAdvice = new List<CustomAdvice>();
+            var userAdvice = new List<AdviceExtendedApi>();
             userAdvice = _dbContext.Advices
             .Include(advice => advice.UserAdvices)
               .ThenInclude(userAdvice => userAdvice.User)
@@ -77,7 +78,7 @@ namespace BackendBPR.Controllers
             .AsSplitQuery()
             .AsParallel()
             .Select(a => {
-                var customAdvice = _mapper.Map<CustomAdvice>(a);
+                var customAdvice = _mapper.Map<AdviceExtendedApi>(a);
                 var userAdvice = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id);
                 if(userAdvice != null){
                     customAdvice.CurrentUserRole = userAdvice.Type;
@@ -131,18 +132,19 @@ namespace BackendBPR.Controllers
         /// <param name="token">User token</param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Give(int plantId, [FromBody] Advice advice ,[FromHeader] string token)
+        public ActionResult Give(int plantId, [FromBody] GiveAdviceApi advice ,[FromHeader] string token)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
-
-            _dbContext.Advices.Add(advice);
+            
+            var adviceDb = _mapper.Map<Advice>(advice);
+            _dbContext.Advices.Add(adviceDb);
             _dbContext.SaveChanges();
 
             _dbContext.UserAdvices.Add(new UserAdvice {
                 UserId = user.Id,
-                AdviceId = advice.Id,
+                AdviceId = adviceDb.Id,
                 Type = AdviceRole.Creator
             });
             _dbContext.SaveChanges();

@@ -109,7 +109,7 @@ namespace BackendBPR.Controllers
         /// <returns>The tags</returns>
         [HttpGet]
         [Route("tag")]
-        public ObjectResult GetDefaultTags([FromBody] int? plantId)
+        public ObjectResult GetDefaultTags([FromQuery] int? plantId)
         {
            if(plantId == null){
                return Ok(_dbContext.Tags

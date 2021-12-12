@@ -38,7 +38,7 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("/MyPlant/[controller]")]
-        public ObjectResult GetPlantTags([FromBody] int plantId, [FromHeader] string token)
+        public ObjectResult GetPlantTags([FromQuery] int plantId, [FromHeader] string token)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)
@@ -55,7 +55,7 @@ namespace BackendBPR.Controllers
         /// <param name="token"></param>
         /// <returns></returns>
         [HttpGet]
-        public ObjectResult GetTags([FromBody] int plantId, [FromHeader] string token)
+        public ObjectResult GetTags([FromQuery] int plantId, [FromHeader] string token)
         {
             ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
             if(!isVerified)

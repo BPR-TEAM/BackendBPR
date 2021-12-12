@@ -10,6 +10,7 @@ using BackendBPR.Database;
 using BackendBPR.Tests.Integration;
  using BackendBPR.Tests.Integration.Utilities;
  using Xunit;
+using BackendBPR.ApiModels;
 
 namespace BackendBPR.Tests.Integration.Controllers
 {
@@ -55,7 +56,7 @@ namespace BackendBPR.Tests.Integration.Controllers
             var url = $"/Advice?plantId={id}";
 
             var response = await client.GetAsync(url);
-            var result = ResponseHandler<List<CustomAdvice>>.GetObject(response);
+            var result = ResponseHandler<List<AdviceExtendedApi>>.GetObject(response);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.True(result[0].Tag.Plants.Any(p => p.Id == id));

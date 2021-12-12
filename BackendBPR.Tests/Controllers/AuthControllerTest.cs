@@ -9,6 +9,8 @@ using Moq;
 using BackendBPR.Controllers;
 using BackendBPR.Database;
 using Xunit;
+using BackendBPR.ApiModels;
+using AutoMapper;
 
 namespace BackendBPR.Tests.Controllers
 {
@@ -16,6 +18,7 @@ namespace BackendBPR.Tests.Controllers
     {
         private readonly Mock<OrangeBushContext> _dbMock;
         private readonly Mock<DbSet<User>> _dbSetMock;
+        private readonly Mock<IMapper> _mapperMock;
         private readonly Mock<ILogger<AuthController>> _loggerMock;
 
         public AuthControllerTest()
@@ -23,6 +26,7 @@ namespace BackendBPR.Tests.Controllers
             _dbMock = new Mock<OrangeBushContext>();
             _dbSetMock = new Mock<DbSet<User>>();
             _loggerMock = new Mock<ILogger<AuthController>>();
+            _mapperMock = new Mock<IMapper>();
 
             var userToBeAuthenticated = new User()
             {
@@ -51,20 +55,19 @@ namespace BackendBPR.Tests.Controllers
         [Fact]
         public void RegisterTest()
         {
-            var controller = new AuthController(_loggerMock.Object,_dbMock.Object);
+            var controller = new AuthController(_loggerMock.Object,_mapperMock.Object,_dbMock.Object);
             _dbMock.Setup(t=> t.Users).Returns(_dbSetMock.Object);
             _dbMock.Setup(t => t.SaveChanges());
-
-            User testUser = new User()
+            _mapperMock.Setup(t => t.Map<User>(It.IsAny<object>())).Returns(new User()
             {
                 Birthday = new DateTime(),
                 FirstName = "Habibi",
                 Username = "Habibi420",
                 Email = "habibi@habibiairlines.com",
                 PasswordHash = "hashmebabyonemoretime"
-            };
+            });
 
-            var result = (OkObjectResult) controller.Register(testUser);
+            var result = (OkObjectResult) controller.Register(new RegisterUserApi());
 
             if (result.StatusCode != null) 
                 Assert.Equal(HttpStatusCode.OK, (HttpStatusCode) result.StatusCode);

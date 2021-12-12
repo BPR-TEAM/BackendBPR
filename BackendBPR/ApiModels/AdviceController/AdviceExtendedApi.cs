@@ -1,9 +1,11 @@
-namespace BackendBPR.Database
+using BackendBPR.Database;
+
+namespace BackendBPR.ApiModels
 {
     /// <summary>
     /// Class that represents a piece of advice given by a user 
     /// </summary>
-    public class CustomAdvice
+    public class AdviceExtendedApi
     {
         /// <summary>
         /// The advice Id

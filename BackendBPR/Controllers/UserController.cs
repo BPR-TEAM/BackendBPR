@@ -6,7 +6,8 @@ using BackendBPR.Database;
 using BackendBPR.Utils;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-
+using BackendBPR.ApiModels;
+using AutoMapper;
 
 namespace BackendBPR.Controllers
 {
@@ -19,16 +20,19 @@ namespace BackendBPR.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
+
+        private readonly IMapper _mapper;
         private readonly OrangeBushContext _dbContext;
         /// <summary>
         /// Constructor for instantiating the controller
         /// </summary>
         /// <param name="logger">The logger to use</param>
         /// <param name="db">The database context to query</param>
-        public UserController(ILogger<AuthController> logger, OrangeBushContext db)
+        public UserController(ILogger<AuthController> logger, IMapper mapper, OrangeBushContext db)
         {
             _logger = logger;
             _dbContext = db;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -231,11 +235,11 @@ namespace BackendBPR.Controllers
         /// Adds a note to the corresponding user that matches the token
         /// </summary>
         /// <param name="_token">The users' token to add to</param>
-        /// <param name="_note">The note to add</param>
+        /// <param name="_note">The note to add - ID should stay empty</param>
         /// <returns>Whether or not the note was added</returns>
         [HttpPost]
         [Route("/profile/note")]
-        public ObjectResult AddNote([FromHeader] String _token, [FromBody] Note _note)
+        public ObjectResult AddNote([FromHeader] String _token, [FromBody] NoteApi _note)
         {
             User user;
             bool isVerified;
@@ -246,8 +250,9 @@ namespace BackendBPR.Controllers
             string trueID = _token.Split('=')[0];
             try
             {
-                _note.UserId = Convert.ToInt32(trueID);
-                _dbContext.Notes.Add(_note);
+                var note = _mapper.Map<Note>(_note);
+                note.UserId = Convert.ToInt32(trueID);
+                _dbContext.Notes.Add(note);
                 _dbContext.SaveChanges();
                 return Ok("The note has been added successfully");
             }
@@ -260,11 +265,11 @@ namespace BackendBPR.Controllers
         /// Updates a note by the corresponding parsed user token and the note id
         /// </summary>
         /// <param name="_token">The user token to update the note to</param>
-        /// <param name="_note">The note to update</param>
+        /// <param name="_note">The note to update - Id needed</param>
         /// <returns>Whether or not the note was updated</returns>
         [HttpPut]
         [Route("/profile/note")]
-        public ObjectResult EditNote([FromHeader] string _token, [FromBody] Note _note)
+        public ObjectResult EditNote([FromHeader] string _token, [FromBody] NoteApi _note)
         {
             if(!ControllerUtilities.TokenVerification(_token, _dbContext))
                 return Unauthorized("User/token mismatch");
@@ -272,8 +277,9 @@ namespace BackendBPR.Controllers
             string trueID = _token.Split('=')[0];
             try
             {
-                _note.UserId = Convert.ToInt32(trueID);
-                _dbContext.Notes.Update(_note);
+                var note = _mapper.Map<Note>(_note);
+                note.UserId = Convert.ToInt32(trueID);
+                _dbContext.Notes.Update(note);
                 _dbContext.SaveChanges();
                 return Ok("The note has been edited successfully");
             }
