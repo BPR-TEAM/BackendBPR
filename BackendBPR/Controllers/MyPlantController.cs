@@ -104,7 +104,9 @@ namespace BackendBPR.Controllers
                     
             return Ok( _dbContext.UserPlants
                     .Include(p => p.Measurements)
+                    .Include(p => p.Plant)
                     .AsNoTracking()
+                    .AsSplitQuery()
                     .AsParallel()
                     .Where(p => p.PlantId == plantId && p.UserId == user.Id).ToList());
         }

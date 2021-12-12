@@ -27,6 +27,7 @@ namespace BackendBPR.Controllers
         /// Constructor for instantiating the controller
         /// </summary>
         /// <param name="logger">The logger to use</param>
+        /// <param name="mapper">The mapper to use</param>
         /// <param name="db">The database context to query</param>
         public UserController(ILogger<AuthController> logger, IMapper mapper, OrangeBushContext db)
         {
