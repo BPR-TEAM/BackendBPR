@@ -22,7 +22,7 @@ namespace BackendBPR.ApiModels
         /// User plants present in this dashboard
         /// </summary>
         /// <value>Virtual list of user plants</value>
-        public virtual ICollection<UserPlant> UserPlants {get;set;}
+        public virtual List<UserPlant> UserPlants {get;set;}
         
     }
 }

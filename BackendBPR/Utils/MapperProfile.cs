@@ -37,5 +37,13 @@ internal class MapperProfile : Profile
 
         CreateMap<BoardApi, Board>();
 
+        CreateMap<UserPlant,UserPlantDashboardApi>()
+        .ForMember(dash => dash.CommonName, cfg => cfg.MapFrom(a => a.Plant.CommonName))
+        .ForMember(dash => dash.MeasurementsDefinitions, cfg => cfg.MapFrom(
+            a => a.Measurements.Select(a => a.MeasurementDefinition.Name).Distinct().ToList()));
+
+        CreateMap<Dashboard,GetDashboardApi>()
+        .ForMember(dash => dash.UserPlants, cfg => cfg.Ignore());
+
     }
 }

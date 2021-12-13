@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -48,9 +49,7 @@ namespace BackendBPR.Controllers
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            return Ok( _dbContext.Dashboards
-                    .Include(d => d.Boards)
-                    .Include(d => d.UserPlants)            
+            return Ok( _dbContext.Dashboards           
                     .AsNoTracking()
                     .AsParallel()
                     .Where(d => d.UserId == user.Id).ToList());
@@ -65,7 +64,23 @@ namespace BackendBPR.Controllers
         [HttpPost]
         public ObjectResult CreateDashboard([FromHeader] string token,[FromBody] CreateDashboardApi dahsboard)
         {
-            _dbContext.Dashboards.Add(_mapper.Map<Dashboard>(dahsboard));
+            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            var dashboardDb = _mapper.Map<Dashboard>(dahsboard);
+            dashboardDb.UserId = user.Id;
+
+            foreach (UserPlant plant in dahsboard.UserPlants){
+                try{                    
+                  var userPLant =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == plant.Id);
+                  dashboardDb.UserPlants.Add(userPLant);
+                }catch(Exception e){
+                    return BadRequest(e.Message);
+                }
+            }  
+
+            _dbContext.Dashboards.Add(dashboardDb);
             _dbContext.SaveChanges();
 
             return Ok("Saved successfully");            
@@ -106,10 +121,20 @@ namespace BackendBPR.Controllers
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            var dashboard =  _dbContext.Dashboards
+            var dashboardDb =  _dbContext.Dashboards
             .Include(dash => dash.Boards)
             .Include(dash => dash.UserPlants)
+              .ThenInclude( userPlant => userPlant.Measurements)
+              .ThenInclude( m => m.MeasurementDefinition)        
+            .Include(dash => dash.UserPlants)
+              .ThenInclude( userPlant => userPlant.Plant)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .AsParallel()
             .FirstOrDefault(dash => dash.Id == id && dash.UserId == user.Id);
+
+            var dashboard = _mapper.Map<GetDashboardApi>(dashboardDb);
+            dashboard.UserPlants = dashboardDb.UserPlants.Select( p => _mapper.Map<UserPlantDashboardApi>(p)).ToList();
 
             return Ok(dashboard);            
         }

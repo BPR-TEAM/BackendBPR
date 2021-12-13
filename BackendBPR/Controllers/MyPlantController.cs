@@ -104,6 +104,7 @@ namespace BackendBPR.Controllers
                     
             return Ok( _dbContext.UserPlants
                     .Include(p => p.Measurements)
+                    .ThenInclude(p=> p.MeasurementDefinition)
                     .Include(p => p.Plant)
                     .AsNoTracking()
                     .AsSplitQuery()
