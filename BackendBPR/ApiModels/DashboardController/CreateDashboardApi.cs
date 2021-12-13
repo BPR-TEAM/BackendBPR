@@ -9,11 +9,6 @@ namespace BackendBPR.ApiModels
     public class CreateDashboardApi
     {
         /// <summary>
-        /// The userId that corresponds to this dashboard
-        /// </summary>
-        /// <value>Random integer representing the userId</value>
-        public int UserId { get; set; }
-        /// <summary>
         /// The name that was given to this dashboard
         /// </summary>
         /// <value>Plain text</value>

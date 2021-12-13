@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using BackendBPR.ApiModels;
@@ -22,7 +24,10 @@ internal class MapperProfile : Profile
 
         CreateMap<RegisterUserApi,User>();
 
-        CreateMap<CreateDashboardApi, Dashboard>();
+        CreateMap<CreateDashboardApi, Dashboard>().ForMember( create => create.UserPlants, cfg => cfg.MapFrom(
+            (a,b) => { 
+                return new List<UserPlant>();}
+                ));
 
         CreateMap<UserPlantApi, UserPlant>();
 
