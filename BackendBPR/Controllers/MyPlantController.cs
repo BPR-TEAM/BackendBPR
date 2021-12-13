@@ -160,7 +160,7 @@ namespace BackendBPR.Controllers
             return Ok("");
         }
 
-         /// <summary>
+        /// <summary>
         /// Get measurements of a plant
         /// </summary>
         /// <param name="userPlantId"></param>
@@ -173,7 +173,7 @@ namespace BackendBPR.Controllers
            if(!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-           return Ok(_dbContext.Measurements.Where(b => b.UserPlantId == userPlantId));
+           return Ok(_dbContext.Measurements.Include(m => m.MeasurementDefinition).Where(b => b.UserPlantId == userPlantId));
         }
 
         /// <summary>
