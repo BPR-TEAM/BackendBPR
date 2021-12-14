@@ -103,8 +103,6 @@ namespace BackendBPR.Controllers
                     .Where(p => p.UserId == user.Id).ToList());
                     
             return Ok(_dbContext.UserPlants
-                    .Include(p => p.Measurements)
-                    .ThenInclude(p=> p.MeasurementDefinition)
                     .Include(p => p.Plant)
                     .AsNoTracking()
                     .AsSplitQuery()
@@ -113,13 +111,18 @@ namespace BackendBPR.Controllers
                     .Select(u =>{
                         var measurementDef = _dbContext.MeasurementDefinitions
                         .Where(m => m.PlantId == u.PlantId)
-                        .Select(m=> m.Name).ToList();     
+                        .Select(m=> m.Name).ToList();
 
                         var customMeasurementDef = _dbContext.CustomMeasurementDefinitions
                         .Where(m => m.UserPlantId == u.Id)
                         .Select(m=> m.Name).ToList();
-                        
+
+                        var measurements = _dbContext.Measurements
+                        .Include(m => m.MeasurementDefinition)
+                        .Where(m=> m.UserPlantId == u.Id).ToList();
+
                         var plantToReturn = _mapper.Map<AllUserPlantApi>(u);
+                        plantToReturn.Measurements = measurements;
                         plantToReturn.MeasurementsDefinitions = measurementDef;
                         plantToReturn.MeasurementsDefinitions.AddRange(customMeasurementDef);
                         return plantToReturn;
