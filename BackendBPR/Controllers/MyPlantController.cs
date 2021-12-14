@@ -193,7 +193,7 @@ namespace BackendBPR.Controllers
 
             var measurementDefintionDb = _mapper.Map<CustomMeasurementDefinition>(measurementDefinition);
 
-            _dbContext.MeasurementDefinitions.Add(measurementDefintionDb);
+            _dbContext.CustomMeasurementDefinitions.Add(measurementDefintionDb);
             _dbContext.SaveChanges();
            return Ok("Measurement  definition added");
         }
