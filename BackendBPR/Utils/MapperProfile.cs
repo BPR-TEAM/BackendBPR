@@ -30,6 +30,7 @@ internal class MapperProfile : Profile
                 ));
 
         CreateMap<UserPlantApi, UserPlant>();
+        CreateMap<UserPlant, AllUserPlantApi>();
 
         CreateMap<CustomMeasurementDefinitionApi, CustomMeasurementDefinition>();
 
