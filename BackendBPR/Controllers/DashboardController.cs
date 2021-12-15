@@ -144,12 +144,13 @@ namespace BackendBPR.Controllers
                 var measurements = _dbContext
                 .Measurements
                 .Include(m => m.MeasurementDefinition)
+                .OrderBy( m=> m.Date)
                 .Where(m => m.UserPlantId == up.Id).AsNoTracking().ToList();
                 up.Plant = plants;
                 up.Measurements = measurements;
                 var mapped = _mapper.Map<UserPlantDashboardApi>(up);
                 return mapped;
-            }).ToList();
+            }).ToList();            
 
             return Ok(dashboard);
         }
