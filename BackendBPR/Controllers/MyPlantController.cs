@@ -110,15 +110,15 @@ namespace BackendBPR.Controllers
                     .Where(p => p.PlantId == plantId && p.UserId == user.Id)
                     .Select(u =>{
                         var measurementDef = _dbContext.MeasurementDefinitions
-                        .Where(m => m.PlantId == u.PlantId)
+                        .Where(m => m.PlantId == u.PlantId).AsNoTracking()
                         .Select(m=> m.Name).ToList();
 
                         var customMeasurementDef = _dbContext.CustomMeasurementDefinitions
-                        .Where(m => m.UserPlantId == u.Id)
+                        .Where(m => m.UserPlantId == u.Id).AsNoTracking()
                         .Select(m=> m.Name).ToList();
 
                         var measurements = _dbContext.Measurements
-                        .Include(m => m.MeasurementDefinition)
+                        .Include(m => m.MeasurementDefinition).AsNoTracking()
                         .Where(m=> m.UserPlantId == u.Id).ToList();
 
                         var plantToReturn = _mapper.Map<AllUserPlantApi>(u);
@@ -127,8 +127,7 @@ namespace BackendBPR.Controllers
                         plantToReturn.MeasurementsDefinitions.AddRange(customMeasurementDef);
                         return plantToReturn;
                     }
-                    ).ToList());
-           
+                    ).ToList());           
         }
 
        /// <summary>
@@ -216,6 +215,26 @@ namespace BackendBPR.Controllers
             _dbContext.SaveChanges();
            return Ok("Measurement  definition added");
         }
+
+        /// <summary>
+        /// Remove measurement
+        /// </summary>
+        /// <param name="token">User token</param>
+        /// <param name="measurementId">Measurement id</param>
+        /// <returns></returns>
+        [HttpDelete]        
+        [Route("removeMeasurement/{measurementId}")]
+        public ObjectResult RemoveMeasurement([FromHeader] string token, int measurementId)
+        {
+            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+                return Unauthorized("User/token mismatch");
+            
+            var toRemove  = _dbContext.Measurements.FirstOrDefault(m => m.Id == measurementId);
+            _dbContext.Measurements.Remove(toRemove);
+            _dbContext.SaveChanges();
+           return Ok("Measurement  removed");
+        }
+
 
         /// <summary>
         /// Method used to import data from a csv file about the plants

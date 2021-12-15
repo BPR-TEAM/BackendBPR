@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-[assembly:InternalsVisibleTo("BackendBPR.Tests.Integration")]
+[assembly: InternalsVisibleTo("BackendBPR.Tests.Integration")]
 namespace BackendBPR.Controllers
 {
     /// <summary>
@@ -41,15 +41,15 @@ namespace BackendBPR.Controllers
         /// </summary>
         /// <param name="token">User token</param>
         /// <returns>A list of the dashboards and its info</returns>
-        [HttpGet]        
+        [HttpGet]
         [Route("all")]
         public ObjectResult GetAllMyDashboards([FromHeader] string token)
         {
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            return Ok( _dbContext.Dashboards           
+            return Ok(_dbContext.Dashboards
                     .AsNoTracking()
                     .AsParallel()
                     .Where(d => d.UserId == user.Id).ToList());
@@ -62,28 +62,32 @@ namespace BackendBPR.Controllers
         /// <param name="dahsboard">Dashboard object (Include UserPlants)</param>
         /// <returns>response message</returns>
         [HttpPost]
-        public ObjectResult CreateDashboard([FromHeader] string token,[FromBody] CreateDashboardApi dahsboard)
+        public ObjectResult CreateDashboard([FromHeader] string token, [FromBody] CreateDashboardApi dahsboard)
         {
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
             var dashboardDb = _mapper.Map<Dashboard>(dahsboard);
             dashboardDb.UserId = user.Id;
 
-            foreach (UserPlant plant in dahsboard.UserPlants){
-                try{                    
-                  var userPLant =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == plant.Id);
-                  dashboardDb.UserPlants.Add(userPLant);
-                }catch(Exception e){
+            foreach (UserPlant plant in dahsboard.UserPlants)
+            {
+                try
+                {
+                    var userPLant = _dbContext.UserPlants.FirstOrDefault(p => p.Id == plant.Id);
+                    dashboardDb.UserPlants.Add(userPLant);
+                }
+                catch (Exception e)
+                {
                     return BadRequest(e.Message);
                 }
-            }  
+            }
 
             _dbContext.Dashboards.Add(dashboardDb);
             _dbContext.SaveChanges();
 
-            return Ok("Saved successfully");            
+            return Ok("Saved successfully");
         }
 
         /// <summary>
@@ -96,15 +100,15 @@ namespace BackendBPR.Controllers
         public ObjectResult DeleteDashboard([FromHeader] string token,
                                             int id)
         {
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            var toRemove =  _dbContext.Dashboards.FirstOrDefault(dash => dash.Id == id);
+            var toRemove = _dbContext.Dashboards.FirstOrDefault(dash => dash.Id == id);
             _dbContext.Remove(toRemove);
             _dbContext.SaveChanges();
 
-            return Ok("Removed successfully");            
+            return Ok("Removed successfully");
         }
 
         /// <summary>
@@ -117,26 +121,37 @@ namespace BackendBPR.Controllers
         public ObjectResult GetDashboard([FromHeader] string token,
                                             int id)
         {
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
-            var dashboardDb =  _dbContext.Dashboards
-            .Include(dash => dash.Boards)
+            var dashboardDb = _dbContext.Dashboards
             .Include(dash => dash.UserPlants)
-              .ThenInclude( userPlant => userPlant.Measurements)
-              .ThenInclude( m => m.MeasurementDefinition)        
-            .Include(dash => dash.UserPlants)
-              .ThenInclude( userPlant => userPlant.Plant)
             .AsNoTracking()
-            .AsSplitQuery()
             .AsParallel()
             .FirstOrDefault(dash => dash.Id == id && dash.UserId == user.Id);
 
             var dashboard = _mapper.Map<GetDashboardApi>(dashboardDb);
-            dashboard.UserPlants = dashboardDb.UserPlants.Select( p => _mapper.Map<UserPlantDashboardApi>(p)).ToList();
+            dashboard.Boards = _dbContext.Boards
+            .Where(b => b.DashboardId == dashboardDb.Id)
+            .AsNoTracking()
+            .ToList();
 
-            return Ok(dashboard);            
+            dashboard.UserPlants = dashboardDb.UserPlants
+            .Select(up =>
+            {
+                var plants = _dbContext.Plants.AsNoTracking().FirstOrDefault(p => p.Id == up.PlantId);
+                var measurements = _dbContext
+                .Measurements
+                .Include(m => m.MeasurementDefinition)
+                .Where(m => m.UserPlantId == up.Id).AsNoTracking().ToList();
+                up.Plant = plants;
+                up.Measurements = measurements;
+                var mapped = _mapper.Map<UserPlantDashboardApi>(up);
+                return mapped;
+            }).ToList();
+
+            return Ok(dashboard);
         }
 
         /// <summary>
@@ -147,9 +162,10 @@ namespace BackendBPR.Controllers
         /// <returns>Response message</returns>
         [HttpPost]
         [Route("board")]
-        public ObjectResult AddBoard([FromBody] BoardApi board,[FromHeader] string token){
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+        public ObjectResult AddBoard([FromBody] BoardApi board, [FromHeader] string token)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
             var boardDb = _mapper.Map<Board>(board);
@@ -167,9 +183,10 @@ namespace BackendBPR.Controllers
         /// <returns>Response message</returns>
         [HttpDelete]
         [Route("board")]
-        public ObjectResult RemoveBoard([FromBody] BoardApi board,[FromHeader] string token){
-            ControllerUtilities.TokenVerification(token, _dbContext,out var user, out var isVerified);
-            if(!isVerified)
+        public ObjectResult RemoveBoard([FromBody] BoardApi board, [FromHeader] string token)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
                 return Unauthorized("User/token mismatch");
 
             var boardDb = _mapper.Map<Board>(board);
@@ -188,16 +205,18 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("plants")]
-        public ObjectResult AddPlants([FromBody] List<UserPlant> userPlants, [FromHeader] string token, int id){
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+        public ObjectResult AddPlants([FromBody] List<UserPlant> userPlants, [FromHeader] string token, int id)
+        {
+            if (!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
-            var dashboard = _dbContext.Dashboards.Include(dash=> dash.UserPlants).FirstOrDefault(dash => dash.Id == id);
+            var dashboard = _dbContext.Dashboards.Include(dash => dash.UserPlants).FirstOrDefault(dash => dash.Id == id);
 
-            foreach (UserPlant plant in userPlants){
-                var userPLant =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == plant.Id);
+            foreach (UserPlant plant in userPlants)
+            {
+                var userPLant = _dbContext.UserPlants.FirstOrDefault(p => p.Id == plant.Id);
                 dashboard.UserPlants.Add(userPLant);
-            }            
+            }
             _dbContext.SaveChanges();
             return Ok("All plants added successfully");
         }
@@ -211,26 +230,28 @@ namespace BackendBPR.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Route("plants")]
-        public ObjectResult RemovePlant([FromBody] UserPlantApi userPlant, [FromHeader] string token, int id){
-            if(!ControllerUtilities.TokenVerification(token, _dbContext))
+        public ObjectResult RemovePlant([FromBody] UserPlantApi userPlant, [FromHeader] string token, int id)
+        {
+            if (!ControllerUtilities.TokenVerification(token, _dbContext))
                 return Unauthorized("User/token mismatch");
 
             var dashboard = _dbContext.Dashboards
-            .Include(dash=> dash.UserPlants)
+            .Include(dash => dash.UserPlants)
             .Include(dash => dash.Boards)
             .FirstOrDefault(dash => dash.Id == id);
 
-            var userPlantToRemove =_dbContext.UserPlants.FirstOrDefault(p=> p.Id == userPlant.Id);
-            dashboard.UserPlants.Remove(userPlantToRemove);      
+            var userPlantToRemove = _dbContext.UserPlants.FirstOrDefault(p => p.Id == userPlant.Id);
+            dashboard.UserPlants.Remove(userPlantToRemove);
 
-            if(!dashboard.UserPlants.Any(p=> p.PlantId == userPlantToRemove.PlantId)){
+            if (!dashboard.UserPlants.Any(p => p.PlantId == userPlantToRemove.PlantId))
+            {
                 var boardsToRemove = dashboard.Boards.Where(b => b.PlantId == userPlantToRemove.PlantId);
                 foreach (Board board in boardsToRemove)
-                  dashboard.Boards.Remove(board);
+                    dashboard.Boards.Remove(board);
             }
             _dbContext.SaveChanges();
 
             return Ok("All plants removed successfully");
-        }               
+        }
     }
 }
