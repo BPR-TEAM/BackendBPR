@@ -36,9 +36,9 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// Gets the general advice for a given plant
+        /// Gets the default advice for a given plant
         /// </summary>
-        /// <returns>A list of the general advice</returns>
+        /// <returns>A list of the default advice</returns>
         [HttpGet]
         [Route("default")]
         public ActionResult GetDefaultAdvice()
@@ -73,9 +73,9 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// Gets the general advice for a given plant
+        /// Gets the featured advice for a given plant
         /// </summary>
-        /// <returns>A list of the general advice</returns>
+        /// <returns>A list of the featured advice</returns>
         [HttpGet]
         [Route("featured")]
         public ActionResult GetFeaturedAdvice()

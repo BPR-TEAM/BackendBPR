@@ -228,7 +228,7 @@ namespace BackendBPR.Controllers
         /// <param name="token">User token authentication</param>
         /// <param name="id">Dashboard's Id</param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [Route("plants")]
         public ObjectResult GetPlantsToAddInDashboard([FromHeader] string token, int id)
         {
