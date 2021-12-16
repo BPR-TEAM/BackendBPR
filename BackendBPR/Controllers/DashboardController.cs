@@ -223,6 +223,24 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
+        /// Get plants left to add in the dashboard
+        /// </summary>
+        /// <param name="token">User token authentication</param>
+        /// <param name="id">Dashboard's Id</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("plants")]
+        public ObjectResult GetPlantsToAddInDashboard([FromHeader] string token, int id)
+        {
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if (!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            _dbContext.UserPlants.Where(p => p.UserId == user.Id && !p.Dashboards.Any(d => d.Id == id)).Select(p => _mapper.Map<UserPlantWTags>(p)).ToList();
+            return Ok("All plants added successfully");
+        }
+
+        /// <summary>
         /// Remove plant from a dashboard
         /// </summary>
         /// <param name="userPlant">User plant to remove from the dashboard</param>

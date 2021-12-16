@@ -31,6 +31,13 @@ internal class MapperProfile : Profile
 
         CreateMap<UserPlantApi, UserPlant>();
         CreateMap<UserPlant, AllUserPlantApi>();
+        CreateMap<UserPlant, UserPlantWTags>()
+        .ForMember(u => u.CommonName, cfg => cfg.MapFrom(a => a.Plant.CommonName))
+        .ForMember(u => u.Tags, cfg => cfg.MapFrom((a,b) => {
+            if(a.Plant.Tags == null)
+              return null;
+            return a.Plant.Tags.Where(t => t.UserId == a.UserId || t.UserId == null).Select(t =>{ t.Plants = null; 
+         return t; });}));
 
         CreateMap<CustomMeasurementDefinitionApi, CustomMeasurementDefinition>();
 

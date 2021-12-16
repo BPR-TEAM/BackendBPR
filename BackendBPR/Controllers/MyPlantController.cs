@@ -56,8 +56,9 @@ namespace BackendBPR.Controllers
 
             plantDb.UserId = user.Id;
             
-           _dbContext.UserPlants.Add(plantDb);
-           _dbContext.SaveChanges();
+            _dbContext.Tags.AddRange(plant.Tags);
+            _dbContext.UserPlants.Add(plantDb);
+            _dbContext.SaveChanges();
 
            return Ok("Plant added");
         }
@@ -96,11 +97,13 @@ namespace BackendBPR.Controllers
                 return Unauthorized("User/token mismatch");
 
             if (plantId == null)
-            return Ok( _dbContext.UserPlants
-                    .Include(p => p.Measurements)
+            return Ok(_dbContext.UserPlants
+                    .Include(p => p.Plant)
+                    .ThenInclude( p => p.Tags)
                     .AsNoTracking()
+                    .AsSplitQuery()
                     .AsParallel()
-                    .Where(p => p.UserId == user.Id).ToList());
+                    .Where(p => p.UserId == user.Id).Select(p=> _mapper.Map<UserPlantWTags>(p)).ToList());
                     
             return Ok(_dbContext.UserPlants
                     .Include(p => p.Plant)
@@ -176,7 +179,7 @@ namespace BackendBPR.Controllers
            _dbContext.Remove(userPlant);
            _dbContext.SaveChanges();
 
-            return Ok("");
+            return Ok("Plant removed");
         }
 
         /// <summary>

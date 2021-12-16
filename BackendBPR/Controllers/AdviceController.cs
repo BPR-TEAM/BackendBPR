@@ -54,6 +54,45 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
+        /// Gets the general advice for a given plant
+        /// </summary>
+        /// <returns>A list of the general advice</returns>
+        [HttpGet]
+        [Route("general")]
+        public ActionResult GetGeneralAdvice()
+        {
+            var generalAdvice = new List<Advice>();
+            generalAdvice = _dbContext.Advices
+            .Include(advice => advice.Tag)
+            .Where(advice => advice.Tag.Name == "General" && advice.Tag.UserId == null)
+            .AsNoTracking()
+            .AsParallel()
+            .ToList();
+
+            return Ok(generalAdvice);
+        }
+
+        /// <summary>
+        /// Gets the general advice for a given plant
+        /// </summary>
+        /// <returns>A list of the general advice</returns>
+        [HttpGet]
+        [Route("featured")]
+        public ActionResult GetFeaturedAdvice()
+        {
+            var featuredAdvice = new List<Advice>();
+            featuredAdvice = _dbContext.Advices
+            .Include( advice => advice.UserAdvices)
+            .OrderByDescending( advice => advice.UserAdvices.Count())
+            .Take(10)
+            .AsNoTracking()
+            .AsParallel()
+            .ToList();
+
+            return Ok(featuredAdvice);
+        }
+
+        /// <summary>
         /// Get all the advices for a plant
         /// </summary>
         /// <param name="plantId">Plant's Id</param>

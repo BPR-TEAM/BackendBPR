@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BackendBPR.Database;
 
 namespace BackendBPR.ApiModels
 {
@@ -27,5 +28,10 @@ namespace BackendBPR.ApiModels
         /// </summary>
         /// <value>BLOB format stored as byte array</value>
         public byte[] Image { get; set;}
+        /// <summary>
+        /// The tags the plant contains
+        /// </summary>
+        /// <value>List of tags</value>
+        public ICollection<Tag> Tags {get;set;}
     }
 }
