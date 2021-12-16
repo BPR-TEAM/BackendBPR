@@ -49,12 +49,14 @@ namespace BackendBPR.Controllers
             if(!isVerified)
                 return Unauthorized("User/token mismatch");
             
-            if(!ControllerUtilities.isImage(plant.Image, 5242880))
+            
+            if(plant.Image != null && !ControllerUtilities.isImage(plant.Image, 5242880))
                 return BadRequest("The plant image is not an image");
 
             var plantDb = _mapper.Map<UserPlant>(plant);
 
             plantDb.UserId = user.Id;
+            plant.Tags = plant.Tags.Select(t => { t.UserId = user.Id; return t; }).ToList();
             
             _dbContext.Tags.AddRange(plant.Tags);
             _dbContext.UserPlants.Add(plantDb);
