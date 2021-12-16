@@ -59,17 +59,28 @@ namespace BackendBPR.Controllers
         /// <returns>A list of the general advice</returns>
         [HttpGet]
         [Route("general")]
-        public ActionResult GetGeneralAdvice()
+        public ActionResult GetGeneralAdvice([FromHeader] string token)
         {
-            var generalAdvice = new List<Advice>();
-            generalAdvice = _dbContext.Advices
-            .Include(advice => advice.Tag)
-            .Where(advice => advice.Tag.Name == "General" && advice.Tag.UserId == null)
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            return Ok(_dbContext.Advices
+            .Include(advice => advice.Tag)            
+            .Include( advice => advice.UserAdvices)
+              .ThenInclude(userAdvice => userAdvice.User)
+            .Where(advice => advice.Tag.Name == "General" && advice.Tag.UserId == null && advice.TagId != null)
             .AsNoTracking()
             .AsParallel()
-            .ToList();
-
-            return Ok(generalAdvice);
+            .Select(a => {
+                var customAdvice = _mapper.Map<AdviceExtendedApi>(a);
+                var userAdvice = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id);
+                if(userAdvice != null){
+                    customAdvice.CurrentUserRole = userAdvice.Type;
+                }
+                return customAdvice;
+            })
+            .ToList());
         }
 
         /// <summary>
@@ -78,18 +89,31 @@ namespace BackendBPR.Controllers
         /// <returns>A list of the featured advice</returns>
         [HttpGet]
         [Route("featured")]
-        public ActionResult GetFeaturedAdvice()
+        public ActionResult GetFeaturedAdvice([FromHeader] string token)
         {
-            var featuredAdvice = new List<Advice>();
-            featuredAdvice = _dbContext.Advices
+            ControllerUtilities.TokenVerification(token, _dbContext, out var user, out var isVerified);
+            if(!isVerified)
+                return Unauthorized("User/token mismatch");
+
+            
+            return Ok(_dbContext.Advices
+            .Include(advice => advice.Tag)   
             .Include( advice => advice.UserAdvices)
+              .ThenInclude(userAdvice => userAdvice.User)
+            .Where(advice => advice.TagId != null)
             .OrderByDescending( advice => advice.UserAdvices.Count())
             .Take(10)
             .AsNoTracking()
             .AsParallel()
-            .ToList();
-
-            return Ok(featuredAdvice);
+            .Select(a => {
+                var customAdvice = _mapper.Map<AdviceExtendedApi>(a);
+                var userAdvice = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id);
+                if(userAdvice != null){
+                    customAdvice.CurrentUserRole = userAdvice.Type;
+                }
+                return customAdvice;
+            })
+            .ToList());
         }
 
         /// <summary>
@@ -118,6 +142,7 @@ namespace BackendBPR.Controllers
             .AsParallel()
             .Select(a => {
                 var customAdvice = _mapper.Map<AdviceExtendedApi>(a);
+                customAdvice.Tag.Plants = null;
                 var userAdvice = a.UserAdvices.FirstOrDefault(userAdvice => userAdvice.UserId == user.Id);
                 if(userAdvice != null){
                     customAdvice.CurrentUserRole = userAdvice.Type;

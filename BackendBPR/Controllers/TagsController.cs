@@ -49,7 +49,7 @@ namespace BackendBPR.Controllers
         }
 
         /// <summary>
-        /// Gets all the tags (user and default)
+        /// Gets all the tags (user)
         /// </summary>
         /// <param name="plantId"></param>
         /// <param name="token"></param>
