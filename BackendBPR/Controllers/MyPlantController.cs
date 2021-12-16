@@ -171,12 +171,12 @@ namespace BackendBPR.Controllers
 
            var userPlant = _dbContext.UserPlants
            .AsParallel()
-           .FirstOrDefault(a => a.PlantId == userPlantId);
+           .FirstOrDefault(a => a.Id == userPlantId);
 
            _dbContext.Remove(userPlant);
            _dbContext.SaveChanges();
 
-            return Ok("");
+            return Ok("Plant removed succesfully");
         }
 
         /// <summary>
