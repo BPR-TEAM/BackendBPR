@@ -53,13 +53,20 @@ namespace BackendBPR.Controllers
             if(plant.Image != null && !ControllerUtilities.isImage(plant.Image, 5242880))
                 return BadRequest("The plant image is not an image");
 
-            var plantDb = _mapper.Map<UserPlant>(plant);
+            var userPlantDb = _mapper.Map<UserPlant>(plant);
 
-            plantDb.UserId = user.Id;
-            plant.Tags = plant.Tags.Select(t => { t.UserId = user.Id; return t; }).ToList();
-            
+            userPlantDb.UserId = user.Id;            
+            var plantDb = _dbContext.Plants.FirstOrDefault(p => p.Id == userPlantDb.PlantId);
+            plant.Tags = plant.Tags.Select(t =>
+            {
+                t.UserId = user.Id;
+                t.Plants = new List<Plant>();
+                t.Plants.Add(plantDb);
+                return t;
+            }).ToList();
+
             _dbContext.Tags.AddRange(plant.Tags);
-            _dbContext.UserPlants.Add(plantDb);
+            _dbContext.UserPlants.Add(userPlantDb);
             _dbContext.SaveChanges();
 
            return Ok("Plant added");
