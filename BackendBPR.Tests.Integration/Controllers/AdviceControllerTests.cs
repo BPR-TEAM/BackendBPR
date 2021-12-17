@@ -11,6 +11,7 @@ using BackendBPR.Tests.Integration;
  using BackendBPR.Tests.Integration.Utilities;
  using Xunit;
 using BackendBPR.ApiModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendBPR.Tests.Integration.Controllers
 {
@@ -58,8 +59,10 @@ namespace BackendBPR.Tests.Integration.Controllers
             var response = await client.GetAsync(url);
             var result = ResponseHandler<List<AdviceExtendedApi>>.GetObject(response);
 
+            var fullTag = db.Tags.Include(t => t.Plants).FirstOrDefault(t => t.Id == result[0].Tag.Id);
+
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.True(result[0].Tag.Plants.Any(p => p.Id == id));
+            Assert.True(fullTag.Plants.Any(p => p.Id == id));
         }
 
         [Theory]             
