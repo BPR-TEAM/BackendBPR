@@ -71,5 +71,5 @@ jobs:
         with:
           app-name: 'orangebush'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3A861E6D5536422182C055F32C4BAC88 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_63247cfdca874d66a7e2bf60e1a92e91 }}
           package: .
