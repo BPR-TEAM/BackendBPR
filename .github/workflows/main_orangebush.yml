@@ -10,25 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test: 
-    runs-on: windows-latest
-    
-    steps:
-    # checkout the repo
-    - name: 'Checkout Github Action'
-      uses: actions/checkout@master
-
-
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '5.0.x'
-      
-    - name: Test
-      run: dotnet test --verbosity normal    
-  
   build:
-    needs: test
     runs-on: windows-latest
 
     steps:
@@ -71,5 +53,5 @@ jobs:
         with:
           app-name: 'orangebush'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_63247cfdca874d66a7e2bf60e1a92e91 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E97D668A93DA470FBDA5F5614C61962C }}
           package: .
